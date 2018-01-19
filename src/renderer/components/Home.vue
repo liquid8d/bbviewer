@@ -20,11 +20,6 @@
       mixins: [ Utils ],
       mounted () {
           this.preventDraggables()
-      },
-      methods: {
-          open (link) {
-              this.$electron.shell.openExternal(link)
-          }
       }
   }
 </script>

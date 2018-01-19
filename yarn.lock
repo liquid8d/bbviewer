@@ -26,6 +26,10 @@
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/7zip/-/7zip-0.0.6.tgz#9cafb171af82329490353b4816f03347aa150a30"
 
+"@kazupon/vue-i18n-loader@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@kazupon/vue-i18n-loader/-/vue-i18n-loader-0.2.1.tgz#a19c363ac4b30a1487cb5ab52f977506d7658994"
+
 "@types/node@^7.0.18":
   version "7.0.52"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.52.tgz#8990d3350375542b0c21a83cd0331e6a8fc86716"
@@ -4325,6 +4329,12 @@ icss-utils@^2.1.0:
 ieee754@^1.1.4:
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.8.tgz#be33d40ac10ef1926701f6f08a2d86fbfd1ad3e4"
+
+ifdef-loader@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/ifdef-loader/-/ifdef-loader-2.0.3.tgz#f63c9c775029e2a59aef1cee341a0edb10598ec8"
+  dependencies:
+    loader-utils "^1.1.0"
 
 iferr@^0.1.5:
   version "0.1.5"

@@ -54,7 +54,18 @@ let rendererConfig = {
       },
       {
         test: /\.js$/,
-        use: 'babel-loader',
+        use: [
+          'babel-loader',
+          {
+            loader: 'ifdef-loader',
+            options: {
+              DEBUG: true,
+              version: 3,
+              "ifdef-verbose": true,
+              "ifdef-triple-slash": false
+            }
+          }
+        ],
         exclude: /node_modules/
       },
       {

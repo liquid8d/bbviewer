@@ -13,12 +13,12 @@
                 </template>
             </div>
             <div class="pad">
-                <a href="https://github.com/SimulatedGREG/electron-vue"><img src="~@/assets/logo.png"></a>
+                <a @click="open('https://github.com/SimulatedGREG/electron-vue')"><img src="~@/assets/logo.png"></a>
                 <p v-t="'credits.electron-vue'"></p>
             </div>
         </div>
         <div class="container" style="flex-grow: 0;">
-            <router-link to="/">{{ $t('back') }}</router-link>
+            <router-link to="/" tag="button">{{ $t('back') }}</router-link>
         </div>
     </div>
 </template>
@@ -34,6 +34,7 @@
 </i18n>
 
 <script>
+    import Utils from '@/mixins/Utils'
     export default {
         name: 'about',
         data () {
@@ -43,6 +44,10 @@
                 platform: require('os').platform(),
                 vue: require('vue/package.json').version
             }
+        },
+        mixins: [ Utils ],
+        mounted () {
+            this.preventDraggables()
         }
     }
 </script>
@@ -50,6 +55,7 @@
 <style>
     a {
         margin-right: 1em;
+        cursor: pointer;
     }
 
     img {

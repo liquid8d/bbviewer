@@ -6,9 +6,13 @@ import router from './router'
 import store from './store'
 import i18n from './i18n'
 
+// check environments
+store.state.environment = process.env.NODE_ENV
 if (!process.env.IS_WEB) {
     Vue.use(require('vue-electron'))
     store.state.isElectron = true
+} else {
+    store.state.isElectron = false
 }
 
 Vue.http = Vue.prototype.$http = axios

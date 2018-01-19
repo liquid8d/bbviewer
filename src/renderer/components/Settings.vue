@@ -4,14 +4,19 @@
             <h1>{{ $t('settings') }}</h1>
         </div>
         <div class="container" style="flex-grow: 0;">
-            <router-link to="/">{{ $t('back') }}</router-link>
+            <router-link to="/" tag="button">{{ $t('back') }}</router-link>
         </div>
     </div>
 </template>
 
 <script>
+    import Utils from '@/mixins/Utils'
     export default {
-        name: 'settings'
+        name: 'settings',
+        mixins: [ Utils ],
+        mounted () {
+            this.preventDraggables()
+        }
     }
 </script>
 

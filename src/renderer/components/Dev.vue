@@ -2,6 +2,7 @@
     <div class="wrapper">
         <div class="container">
             <h1>{{ $t('dev') }}</h1>
+            <button @click.stop.prevent="fullscreen()">Fullscreen</button>
             <button @click="dir = chooseFolder()">{{dir}}</button>
             <button @click="screenshot()">Screenshot</button>
             <button @click="createNewWindow()">New</button>
@@ -11,7 +12,7 @@
             <button @click="setWindowOnTop()">Toggle OnTop</button>
         </div>
         <div class="container" style="flex-grow: 0;">
-            <router-link to="/">{{ $t('back') }}</router-link>
+            <router-link to="/" tag="button">{{ $t('back') }}</router-link>
         </div>
     </div>
 </template>

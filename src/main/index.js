@@ -1,6 +1,7 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
+require('./ipc-main')
 
 /**
  * Set `__static` path to static files in production
@@ -10,28 +11,8 @@ if (process.env.NODE_ENV !== 'development') {
     global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
-    ? `http://localhost:9080`
-    : `file://${__dirname}/index.html`
-
 function createWindow () {
-    /**
-   * Initial window options
-   */
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 450,
-        backgroundColor: '#111',
-        menu: null,
-        useContentSize: true
-    })
-
-    mainWindow.loadURL(winURL)
-
-    mainWindow.on('closed', () => {
-        mainWindow = null
-    })
+    ipcMain.emit('window.new')
 }
 
 app.on('ready', createWindow)
@@ -43,9 +24,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow()
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
 /**

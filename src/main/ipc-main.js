@@ -12,11 +12,12 @@ ipcMain.on('window.new', () => {
         : `file://${__dirname}/index.html`
 
     let win = new BrowserWindow({
+        title: 'BBViewer',
         width: 800,
         height: 450,
         backgroundColor: '#111',
         menu: null,
-        useContentSize: true
+        useContentSize: false
     })
 
     win.loadURL(winURL)
@@ -61,7 +62,7 @@ ipcMain.on('app.screenshot', (event, arg) => {
     let focused = BrowserWindow.getFocusedWindow()
     focused.capturePage((img) => {
         let dir = path.join(app.getPath('documents'), 'bbviewer')
-        let filename = arg.filename || new Date().getTime() + '.png'
+        let filename = new Date().getTime() + '.png'
         fs.mkdir(dir, () => {
             fs.writeFile(path.join(dir, filename), img.toPNG(), (err) => {
                 if (err) console.warn('unable to create screenshot')

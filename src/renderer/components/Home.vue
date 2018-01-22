@@ -1,28 +1,18 @@
 <template>
-  <div class="wrapper">
-    <div class="container">
-      <h1 class="title">{{ $t('welcome') }}</h1>
-    </div>
-    <div class="container" style="flex-grow: 0;">
-      <!-- <template v-if="this.environment() === 'development'"> -->
-        <router-link to="dev" tag="button">Dev</router-link>
-      <!-- </template> -->
-      <router-link to="settings" tag="button">{{ $t('settings') }}</router-link>
-      <router-link to="about" tag="button">{{ $t('about') }}</router-link>
-    </div>
-  </div>
+    <control-bar></control-bar>
 </template>
 
 <script>
   import Utils from '@/mixins/Utils'
+  import ControlBar from './ControlBar/ControlBar'
+  // import { PlayerEvents } from './Player/PlayerEvents'
+
   export default {
       name: 'home',
+      components: { ControlBar },
       mixins: [ Utils ],
       mounted () {
           this.preventDraggables()
       }
   }
 </script>
-
-<style>
-</style>

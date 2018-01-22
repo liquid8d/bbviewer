@@ -17,7 +17,11 @@ ipcMain.on('window.new', () => {
         height: 450,
         backgroundColor: '#111',
         menu: null,
-        useContentSize: false
+        useContentSize: false,
+        webPreferences: {
+            plugins: true,
+            webSecurity: false
+        }
     })
 
     win.loadURL(winURL)

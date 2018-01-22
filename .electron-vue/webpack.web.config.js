@@ -104,6 +104,10 @@ let webConfig = {
       },
       nodeModules: false
     }),
+    new webpack.ProvidePlugin({
+      videojs: 'video.js',
+      'window.videojs': 'video.js'
+    }),
     new webpack.DefinePlugin({
       'process.env.IS_WEB': 'true'
     }),
@@ -131,12 +135,13 @@ if (process.env.NODE_ENV === 'production') {
   webConfig.devtool = ''
 
   webConfig.plugins.push(
-    new BabiliWebpackPlugin(),
+    // TODO Babili breaks videojs-contrib-hls.js when minifying
+    // new BabiliWebpackPlugin(),
     new CopyWebpackPlugin([
       {
         from: path.join(__dirname, '../static'),
         to: path.join(__dirname, '../dist/web/static'),
-        ignore: ['.*']
+        ignore: ['pepper/**/*', '.*']
       }
     ]),
     new webpack.DefinePlugin({

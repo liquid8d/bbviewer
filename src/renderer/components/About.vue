@@ -1,5 +1,5 @@
 <template>
-    <div class="wrapper">
+    <div class="page">
         <div class="container">
             <span class="title" v-t="'about'"></span>
             <div class="items">
@@ -16,8 +16,6 @@
                 <a @click="open('https://github.com/SimulatedGREG/electron-vue')"><img src="~@/assets/logo.png"></a>
                 <p v-t="'credits.electron-vue'"></p>
             </div>
-        </div>
-        <div class="container" style="flex-grow: 0;">
             <router-link to="/" tag="button">{{ $t('back') }}</router-link>
         </div>
     </div>

@@ -113,6 +113,16 @@ let rendererConfig = {
             name: 'fonts/[name]--[folder].[ext]'
           }
         }
+      },
+      {
+        test: /\.swf$/,
+        use: {
+          loader: 'file-loader',
+          query: {
+            limit: 10000,
+            name: 'static/[name].[ext]'
+          }
+        }
       }
     ]
   },
@@ -133,6 +143,10 @@ let rendererConfig = {
       nodeModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(__dirname, '../node_modules')
         : false
+    }),
+    new webpack.ProvidePlugin({
+      videojs: 'video.js',
+      'window.videojs': 'video.js'
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin()
@@ -179,7 +193,7 @@ if (process.env.NODE_ENV === 'production') {
       }
     ]),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"production"'
+      'process.env.NODE_ENV': '"production"',
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true

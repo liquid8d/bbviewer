@@ -92,6 +92,8 @@ export default {
             PlayerEvents.$on('muted', this.muted)
             PlayerEvents.$on('toggleMute', this.toggleMute)
 
+            PlayerEvents.$on('pip', this.togglePip)
+
             console.log('video component ready.')
 
             // update
@@ -223,6 +225,13 @@ export default {
             if (!this.paused()) this.player.pause()
             this.player.reset()
             this.streamInfo = { tech: null, qualities: [], isLiveStream: false }
+        },
+        togglePip () {
+            if (this.$el.classList.contains('pip')) {
+                this.$el.classList.remove('pip')
+            } else {
+                this.$el.classList.add('pip')
+            }
         }
     }
 }

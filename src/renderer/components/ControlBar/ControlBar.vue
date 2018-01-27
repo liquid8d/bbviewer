@@ -6,11 +6,18 @@
 
 <script>
     import Primary from './Primary'
+    import router from '../../router'
     export default {
         name: 'controlBar',
+        router,
         data () {
             return {
                 view: Primary
+            }
+        },
+        methods: {
+            beforeRouteUpdate (to, from, next) {
+                console.log('router to ' + to + ' from ' + from)
             }
         }
     }

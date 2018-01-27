@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button @click="$router.push('browse')">Browse</button>
+        <button @click="$router.replace('browse')">Browse</button>
         <button @click="playerRedirect('stop')">Stop</button>
         <!-- <label>{{ streamInfo.currentTime }} / {{ streamInfo.duration }}</label> -->
         <button @click.stop.prevent="playerRedirect('seek', -300)">-300</button>
@@ -19,6 +19,9 @@
     export default {
         name: 'primary',
         components: { Secondary, PlayerEvents },
+        mounted () {
+            this.$extendedInput.selectEl()
+        },
         methods: {
             toggle () {
                 this.$parent.view = Secondary

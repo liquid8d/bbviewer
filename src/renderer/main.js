@@ -6,6 +6,9 @@ import router from './router'
 import store from './store'
 import i18n from './i18n'
 
+import ExtendedInput from './plugins/VueExtendedInput'
+Vue.use(ExtendedInput)
+
 // check environments
 store.state.environment = process.env.NODE_ENV
 if (!process.env.IS_WEB) {

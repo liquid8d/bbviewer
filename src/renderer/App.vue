@@ -10,15 +10,21 @@
 import Utils from './mixins/Utils'
 import Backdrop from './components/Backdrop'
 import Player from './components/Player/Player'
+import router from './router'
 
 export default {
     name: 'bbviewer',
     mixins: [ Utils ],
     components: { Backdrop, Player },
+    router,
     mounted () {
         console.log('App Ready')
         this.setDraggable(document.querySelector('#app'))
-        document.body.addEventListener('mousemove', this.unfocus())
+        this.$extendedInput.init({
+            home: function () {
+                router.replace('/')
+            }
+        })
     }
 }
 </script>
@@ -41,6 +47,15 @@ html, body {
   color: #999;
   font-family: 'Source Sans Pro', sans-serif;
   font-size: 18px;
+}
+
+::-webkit-scrollbar {
+  background-color: #444;
+  width: 0.75em;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #999;
 }
 
 #app, .fill {
@@ -119,10 +134,4 @@ button {
   height: 2.5em;
   cursor: pointer;
 }
-
-button:hover {
-  background-color:green;
-  color: rgb(89, 255, 47);
-}
-
 </style>

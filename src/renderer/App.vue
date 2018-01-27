@@ -1,7 +1,7 @@
 <template>
     <div id="app">
       <backdrop style="z-index: 0;"></backdrop>
-      <player ref="player" style="z-index: 1;"></player>
+      <player ref="player"></player>
       <router-view style="z-index: 2;"></router-view>
     </div>
 </template>
@@ -50,13 +50,20 @@ html, body {
 }
 
 ::-webkit-scrollbar {
-  background-color: #444;
-  width: 0.75em;
+    width: 0.5em;
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #999;
+::-webkit-scrollbar-track {
+    background: rgba(50,50,50,1.0);
+    border: 1px solid rgba(50,50,50,0.8);
 }
+::-webkit-scrollbar-thumb {
+    background: rgba(100,100,100,1.0);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(100,100,100,0.75); 
+}
+::-webkit-scrollbar-corner { background: rgba(0,0,0,0); }
 
 #app, .fill {
   position: absolute;
@@ -67,21 +74,6 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-}
-
-.pip {
-    background: rgb(0,0,0);
-    position: absolute;
-    top: 1em;
-    right: 1em;
-    border: 1px solid rgb( 50, 50, 50 );
-    width: 192px;
-    height: 108px;
-    -webkit-box-shadow: 0px 0px 4px 1px rgba(0,0,0,0.75);
-    -moz-box-shadow: 0px 0px 4px 1px rgba(0,0,0,0.75);
-    box-shadow: 0px 0px 4px 1px rgba(0,0,0,0.75);
-    pointer-events: none;
-    z-index: 100;
 }
 
 .page {
@@ -129,9 +121,32 @@ button {
   background: #444;
   border: none;
   text-align: center;
+  line-height: 1em;
   margin: 0.25em;
   padding: 0.5em;
   height: 2.5em;
   cursor: pointer;
+}
+
+button.icon {
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.15em;
+    color:#828e96;
+    cursor: pointer;
+    -webkit-filter: drop-shadow( 2px 2px 3px #000 ); 
+    filter: drop-shadow( 2px 2px 3px #000 );
+}
+
+button.icon:focus {
+    background: rgb( 90, 200, 20 );
+}
+
+button.icon > img {
+    width: 1.5em;
+    height: 1.5em;
 }
 </style>

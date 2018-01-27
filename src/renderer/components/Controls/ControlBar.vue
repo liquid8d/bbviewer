@@ -24,16 +24,14 @@
 </script>
 
 <style scoped>
+/* CONTROLS */
 .controls {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: #333;
+    height: 2.75em;
+    background-color: #111;
     padding: 0.25em;
-}
-button {
-    height: 3.25em;
-    width: 4.25em;
 }
 </style>

@@ -19,7 +19,6 @@
             <p>
             <span>Selected Folder: </span><label>{{dir}}</label>
             </p>
-            <button @click.stop.prevent="fullscreen()">Fullscreen</button>
             <button @click="dir = chooseFolder()">Choose Folder</button>
             <button @click="screenshot()">Screenshot</button>
             <button @click="createNewWindow()">New Window</button>

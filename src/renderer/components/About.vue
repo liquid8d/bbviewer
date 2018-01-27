@@ -46,6 +46,7 @@
         mixins: [ Utils ],
         mounted () {
             this.preventDraggables()
+            this.$extendedInput.selectEl()
         }
     }
 </script>

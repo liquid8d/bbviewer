@@ -3,12 +3,10 @@
         <div class="container">
             <h1>{{ $t('dev') }}</h1>
             <h2>Player Control</h2>
-            <button @click="playerRedirect('playbackRate', 0.5)">SPEED 0.5</button>
-            <button @click="playerRedirect('playbackRate', 1)">SPEED 1</button>
-            <button @click="playerRedirect('playbackRate', 2)">SPEED2</button>
             <button @click="playerRedirect('aspectRatio', '4:3')">ASPECT 4:3</button>
             <button @click="playerRedirect('aspectRatio', '16:9')">ASPECT 16:9</button>
             <button @click="playerRedirect('aspectRatio', '16:10')">ASPECT 16:10</button>
+            <button @click="playerRedirect('volume', 0)">VOL0</button>
             <button @click="playerRedirect('volume', 0.5)">VOL50</button>
             <button @click="playerRedirect('volume', 1)">VOL100</button>
             <button @click="playerRedirect('setQualityIndex', 0)">QUALITY 0</button>
@@ -67,6 +65,7 @@
         },
         mounted () {
             this.preventDraggables()
+            this.$extendedInput.selectEl()
         },
         mixins: [ Utils ]
     }

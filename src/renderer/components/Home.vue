@@ -24,30 +24,25 @@
             }
         },
         mixins: [ Utils ],
-        created () {
-            console.log('created home')
-        },
         mounted () {
-            console.log('mounted home')
             this.preventDraggables()
             if (this.hideEnable) {
                 this.$el.addEventListener('mousemove', this.showControls, false)
-                this.$el.addEventListener('keydown', this.showControls, false)
+                this.$extendedInput.Keyboard.$on('key', this.showControls)
+                this.$extendedInput.Gamepad.$on('key', this.showControls)
             }
             this.showControls()
         },
         beforeDestroy () {
-            console.log('unhooking hide controls')
             this.$el.removeEventListener('mousemove', this.showControls)
-            this.$el.removeEventListener('keydown', this.showControls)
+            this.$extendedInput.Keyboard.$off('key', this.showControls)
+            this.$extendedInput.Gamepad.$off('key', this.showControls)
         },
         methods: {
             hideControls () {
-                console.log('hide controls')
                 this.$el.style.opacity = 0
             },
             showControls () {
-                console.log('reset show controls')
                 if (this.hideEnable) {
                     clearTimeout(hideTimer)
                     hideTimer = setTimeout(e => this.hideControls(), this.hideTimeout)
@@ -71,7 +66,13 @@
 }
 
 .fade {
+    pointer-events: none;
     transition-property: opacity;
     transition-duration: 0.5s;
 }
+
+.fade > * {
+    pointer-events: auto;
+}
+
 </style>

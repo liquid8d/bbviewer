@@ -9,7 +9,8 @@ export default new Vuex.Store({
     state: {
         locale: 'en',
         version: '6.0.0',
-        build: 'stable'
+        build: 'stable',
+        plugins: {}
     },
     modules,
     strict: process.env.NODE_ENV !== 'production'

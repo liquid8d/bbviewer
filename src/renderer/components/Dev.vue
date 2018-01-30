@@ -2,30 +2,32 @@
     <div class="page">
         <div class="container">
             <h1>{{ $t('dev') }}</h1>
+            <h2>Routes</h2>
+                <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="~@/assets/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('bookmarks')"><img src="~@/assets/controls/ic_bookmark_white_48px.svg" /><span>{{$t('bookmarks')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('flashbacks')"><img src="~@/assets/controls/ic_history_white_48px.svg" /><span>{{$t('flashbacks')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('cast')"><img src="~@/assets/controls/ic_cast_white_48px.svg" /><span>{{$t('cast')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('notifications')"><img src="~@/assets/controls/ic_new_releases_white_48px.svg" /><span>{{$t('notifications')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('auth')"><img src="~@/assets/controls/ic_vpn_key_white_48px.svg" /><span>{{$t('auth')}}</span></button>
             <h2>Player Control</h2>
-            <button @click="playerRedirect('aspectRatio', '4:3')">ASPECT 4:3</button>
-            <button @click="playerRedirect('aspectRatio', '16:9')">ASPECT 16:9</button>
-            <button @click="playerRedirect('aspectRatio', '16:10')">ASPECT 16:10</button>
-            <button @click="playerRedirect('volume', 0)">VOL0</button>
-            <button @click="playerRedirect('volume', 0.5)">VOL50</button>
-            <button @click="playerRedirect('volume', 1)">VOL100</button>
-            <button @click="playerRedirect('setQualityIndex', 0)">QUALITY 0</button>
-            <button @click="playerRedirect('setQualityIndex', 1)">QUALITY 1</button>
-            <button @click="playerRedirect('setQualityIndex', 2)">QUALITY 2</button>
-            <button @click="playerRedirect('goLive')">GO LIVE</button>
-        </div>
-        <div class="container">
+                <button @click="playerRedirect('aspectRatio', '4:3')">ASPECT 4:3</button>
+                <button @click="playerRedirect('aspectRatio', '16:9')">ASPECT 16:9</button>
+                <button @click="playerRedirect('aspectRatio', '16:10')">ASPECT 16:10</button>
+                <button @click="playerRedirect('volume', 0)">VOL0</button>
+                <button @click="playerRedirect('volume', 0.5)">VOL50</button>
+                <button @click="playerRedirect('volume', 1)">VOL100</button>
+                <button @click="playerRedirect('setQualityIndex', 0)">QUALITY 0</button>
+                <button @click="playerRedirect('setQualityIndex', 1)">QUALITY 1</button>
+                <button @click="playerRedirect('setQualityIndex', 2)">QUALITY 2</button>
+                <button @click="playerRedirect('goLive')">GO LIVE</button>
             <h2>App Tests</h2>
-            <p>
-            <span>Selected Folder: </span><label>{{dir}}</label>
-            </p>
-            <button @click="dir = chooseFolder()">Choose Folder</button>
-            <button @click="screenshot()">Screenshot</button>
-            <button @click="createNewWindow()">New Window</button>
-            <button @click="resizeWindow(640,360)">Resize Window</button>
-            <button @click="setWindowTitle('Test')">Set Window Title</button>
-            <button @click="restartApp()">Restart</button>
-            <button @click="setWindowOnTop()">Toggle OnTop</button>
+                <p>
+                <span>Selected Folder: </span><label>{{dir}}</label>
+                </p>
+                <button @click="dir = chooseFolder()">Choose Folder</button>
+                <button @click="resizeWindow(640,360)">Resize Window</button>
+                <button @click="setWindowTitle('Test')">Set Window Title</button>
+                <button class="icon" @mousedown.stop @click="restartApp()" v-bind:title="$t('restart')"><img src="~@/assets/controls/ic_refresh_white_48px.svg" /><span>{{$t('restart')}}</span></button>
         </div>
         <div class="container">
             <router-link to="/" tag="button">{{ $t('back') }}</router-link>
@@ -36,7 +38,14 @@
 <i18n>
 {
     "en": {
-        "dev": "Dev Testing"
+        "dev": "Dev Testing",
+        "account": "Accounts",
+        "auth": "Authenticate",
+        "bookmarks": "Bookmarks",
+        "cast": "Cast",
+        "flashbacks": "Flashbacks",
+        "notifications": "Notifications",
+        "restart": "Restart App"
     }
 }
 </i18n>

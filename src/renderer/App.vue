@@ -100,32 +100,33 @@ html, body {
   margin-bottom: 6px;
 }
 
+span, label, a {
+    font-size: 0.75em;
+    color: #4cc078;
+}
+
 a {
   text-decoration: none;
-  color: #0b7734;
   margin-right: 1em;
 }
 
-a:hover {
-  color: #18b353;
-}
-
 :focus, :hover:focus {
-  outline: none;
-  background-color:green;
-  color: rgb(89, 255, 47);
+    outline: none;
+    background-color:#18b353;
+    color: #efefef;
 }
 
 button {
-  display: inline-block;
-  background: #444;
-  border: none;
-  text-align: center;
-  line-height: 1em;
-  margin: 0.25em;
-  padding: 0.5em;
-  height: 2.5em;
-  cursor: pointer;
+    display: inline-block;
+    background: #111;
+    border-radius: 0.15em;
+    color: #999;
+    border: none;
+    text-align: center;
+    margin: 0.25em;
+    padding: 0.5em;
+    height: 2.5em;
+    cursor: pointer;
 }
 
 button.icon {
@@ -134,15 +135,20 @@ button.icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0.15em;
-    color:#828e96;
     cursor: pointer;
-    -webkit-filter: drop-shadow( 2px 2px 3px #000 ); 
-    filter: drop-shadow( 2px 2px 3px #000 );
+    font-weight: bold;
+    min-width: 2.5em;
+    /* -webkit-filter: drop-shadow( 2px 2px 3px #000 ); 
+    filter: drop-shadow( 2px 2px 3px #000 ); */
 }
 
-button.icon:focus {
-    background: rgb( 90, 200, 20 );
+button.icon > span {
+    margin-left: 0.5em;
+    font-size: 0.8em;
+}
+
+button.icon:focus > span {
+    color: #efefef;
 }
 
 button.icon > img {

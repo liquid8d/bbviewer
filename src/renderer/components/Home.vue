@@ -58,9 +58,7 @@
     display: inline-block;
     position: relative;
     border-radius: 0.15em;
-    height: 2.5em;
-    max-width: 14em;
-    background: #1c252b;
+    background: #202529;
     margin: 0.25em;
     padding: 0.25em;
 }

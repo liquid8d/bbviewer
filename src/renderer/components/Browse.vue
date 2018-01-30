@@ -14,10 +14,18 @@
         </div>
         <div class="container">
             <router-link to="/" tag="button">Back</router-link>
-            <button @click.prevent="fetch()">Force Update</button>
+            <button class="icon" @mousedown.stop @click="fetch()" v-bind:title="$t('refresh')"><img src="~@/assets/controls/ic_refresh_white_48px.svg" /><span>{{$t('refresh')}}</span></button>
         </div>
     </div>
 </template>
+
+<i18n>
+{
+    "en": {
+        "refresh": "Force Refresh"
+    }
+}
+</i18n>
 
 <script>
     import axios from 'axios'

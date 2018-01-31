@@ -2,6 +2,7 @@
     <div class="fill fade">
         <volume></volume>
         <speed></speed>
+        <angles></angles>
         <control-bar ref="controlBar"></control-bar>
     </div>
 </template>
@@ -11,12 +12,13 @@
     import ControlBar from './Controls/ControlBar'
     import Volume from './Controls/Volume'
     import Speed from './Controls/Speed'
+    import Angles from './Controls/Angles'
 
     var hideTimer
 
     export default {
         name: 'home',
-        components: { ControlBar, Volume, Speed },
+        components: { ControlBar, Volume, Speed, Angles },
         data () {
             return {
                 hideEnable: true,

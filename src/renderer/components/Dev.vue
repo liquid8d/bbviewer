@@ -4,7 +4,6 @@
             <h1>{{ $t('dev') }}</h1>
             <h2>Routes</h2>
                 <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="~@/assets/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
-                <button class="icon" @mousedown.stop v-bind:title="$t('bookmarks')"><img src="~@/assets/controls/ic_bookmark_white_48px.svg" /><span>{{$t('bookmarks')}}</span></button>
                 <button class="icon" @mousedown.stop v-bind:title="$t('flashbacks')"><img src="~@/assets/controls/ic_history_white_48px.svg" /><span>{{$t('flashbacks')}}</span></button>
                 <button class="icon" @mousedown.stop v-bind:title="$t('cast')"><img src="~@/assets/controls/ic_cast_white_48px.svg" /><span>{{$t('cast')}}</span></button>
                 <button class="icon" @mousedown.stop v-bind:title="$t('notifications')"><img src="~@/assets/controls/ic_new_releases_white_48px.svg" /><span>{{$t('notifications')}}</span></button>

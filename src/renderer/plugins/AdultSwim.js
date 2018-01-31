@@ -9,10 +9,10 @@ const AdultSwimPlugin = new Vue({
         return {
             id: 'adult-swim',
             title: 'Adult Swim',
-            desc: '',
+            desc: 'Animation Marathon',
             poster: 'https://pbs.twimg.com/profile_images/1634362280/AS-icon-300x300_400x400.jpg',
             handler: 'adult-swim',
-            src: 'r0xw2u30R3GchW27yVqlug',
+            src: 'Xv-Zn5pcTZO0bmiWd8ZgNw',
             apiBase: 'http://www.adultswim.com/videos/api/v3/',
             params: '?fields=title%2Ctype%2Cduration%2Ccollection_title%2Cimages%2Cstream%2Csegments%2Ctitle_id&iframe=false'
         }

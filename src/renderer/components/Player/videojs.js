@@ -25,7 +25,12 @@ export default {
                 liveWindow: 40
             },
             streamInfo: {
+                volume: 0,
                 currentTime: 0,
+                currentHHMMSS: '',
+                durationHHMMSS: '',
+                duration: 0,
+                position: 0,
                 qualities: [],
                 isLiveStream: false
             }
@@ -68,21 +73,20 @@ export default {
             //     // 'usingnativecontrols', 'usingcustomcontrols', 'useractive', 'userinactive', 'dispose'
             // ]
 
-            // // expose vjs and player events
-            // for (var i = 0; i < vjsEvents.length; i++) {
-            //     PlayerEvents.$emit(vjsEvents[i])
-            // }
-            // var exposed = [ 'play', 'pause', 'stop', 'playbackRate', 'mute', 'seek', 'seekTo' ]
-            // for (var x = 0; x < exposed.length; x++) {
-            //     PlayerEvents.$on(exposed[x], exposed[x])
-            // }
+            // expose vjs events
+            var vjsEvents = [ 'timeupdate', 'volumechange' ]
+            for (var i = 0; i < vjsEvents.length; i++) {
+                this.player.on(vjsEvents[i], this.redirectPlayerEvent)
+            }
 
+            // handle incoming events
             PlayerEvents.$on('aspectRatio', this.aspectRatio)
             PlayerEvents.$on('play', this.play)
             PlayerEvents.$on('pause', this.pause)
             PlayerEvents.$on('stop', this.stop)
             PlayerEvents.$on('seek', this.seek)
             PlayerEvents.$on('seekTo', this.seekTo)
+            PlayerEvents.$on('seekNormalize', this.seekNormalize)
             PlayerEvents.$on('playbackRate', this.playbackRate)
 
             PlayerEvents.$on('volume', this.volume)
@@ -95,18 +99,9 @@ export default {
             PlayerEvents.$on('pip', this.togglePip)
 
             console.log('video component ready.')
-
-            // update
-            setInterval(() => {
-                this.update()
-            }, 500)
         }
     },
     methods: {
-        update () {
-            // this.streamInfo.currentTime = this.currentTime()
-            // this.streamInfo.duration = this.duration()
-        },
         aspectRatio (ratio) {
             this.player.aspectRatio(ratio)
         },
@@ -195,6 +190,18 @@ export default {
             }
             this.player.play()
         },
+        redirectPlayerEvent (event) {
+            if (event.type === 'timeupdate') {
+                this.streamInfo.currentTime = (this.currentTime() !== undefined) ? this.currentTime() : -1
+                this.streamInfo.duration = (this.duration() !== undefined) ? this.duration() : -1
+                this.streamInfo.currentHHMMSS = (this.streamInfo.currentTime !== -1) ? this.toHHMMSS(this.streamInfo.currentTime) : ''
+                this.streamInfo.durationHHMMSS = (this.streamInfo.duration !== -1) ? this.toHHMMSS(this.streamInfo.duration) : ''
+                this.streamInfo.position = (this.streamInfo.currentTime !== -1 && this.streamInfo.duration !== -1) ? this.streamInfo.currentTime / this.streamInfo.duration : 0
+            } else if (event.type === 'volumechange') {
+                this.streamInfo.volume = this.player.volume()
+            }
+            PlayerEvents.$emit('streamInfo', this.streamInfo)
+        },
         remainingTime () {
             return this.player.remainingTime()
         },
@@ -211,6 +218,9 @@ export default {
                 this.$emit('seekTo')
             }
         },
+        seekNormalize (normalize) {
+            this.seekTo(this.player.duration() * normalize)
+        },
         seeking () {
             return this.player.seeking()
         },
@@ -218,13 +228,33 @@ export default {
             console.log('no quality index implementation yet')
         },
         volume (val) {
-            this.player.volume(val)
+            if (val) this.player.volume(val)
             return this.player.volume()
         },
         stop () {
             if (!this.paused()) this.player.pause()
             this.player.reset()
-            this.streamInfo = { tech: null, qualities: [], isLiveStream: false }
+            this.streamInfo = {
+                volume: 0,
+                currentTime: 0,
+                currentHHMMSS: '',
+                durationHHMMSS: '',
+                duration: 0,
+                position: 0,
+                qualities: [],
+                isLiveStream: false
+            }
+        },
+        toHHMMSS (sec) {
+            var secs = parseInt(sec, 10)
+            var hours = Math.floor(secs / 3600)
+            var minutes = Math.floor((secs - (hours * 3600)) / 60)
+            var seconds = secs - (hours * 3600) - (minutes * 60)
+
+            if (hours < 10) hours = '0' + hours
+            if (minutes < 10) minutes = '0' + minutes
+            if (seconds < 10) seconds = '0' + seconds
+            return hours + ':' + minutes + ':' + seconds
         },
         togglePip () {
             if (this.$el.classList.contains('pip')) {

@@ -68,7 +68,7 @@
                 Object.keys(plugins).forEach(key => this.items.push(plugins[key]))
 
                 // fetch remote items
-                axios.get('https://goodiesfor.me/bbviewer/content')
+                axios.get('http://goodiesfor.me/bbviewer/content')
                     .then((response) => {
                         if (response.data && response.data.items) response.data.items.forEach(item => this.items.push(item))
                     })

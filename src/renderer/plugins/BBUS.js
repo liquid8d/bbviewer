@@ -8,11 +8,34 @@ const { PlayerEvents } = require('../components/Player/PlayerEvents')
 const BBUS = new Vue({
     data () {
         return {
-            id: 'bbus',
-            handler: 'bbus',
-            title: 'CBS Big Brother',
+            id: 'bbus19',
+            handler: 'bbus19',
+            title: 'Big Brother 19 Live Feeds',
             desc: '',
-            src: { year: 2017, month: 6, day: 29 },
+            info: {
+                season: '19',
+                bookmarks: 'http://goodiesfor.me/bigbrother/data/bookmarks?s=bbus19&t=bbviewer',
+                feedsStart: '1498536000',
+                feedsEnd: '1505959200',
+                feedsStartDay: '7',
+                DSTStart: '1489302000',
+                DSTEnd: '1509865200',
+                angles: [
+                    { id: 1, label: '1', desc: 'Cam 1' },
+                    { id: 2, label: '2', desc: 'Cam 2' },
+                    { id: 3, label: '3', desc: 'Cam 3' },
+                    { id: 4, label: '4', desc: 'Cam 4' },
+                    { id: 5, label: 'Q', desc: 'Quad Cam' },
+                    { id: 6, label: 'T', desc: 'Thumbs Cam' }
+                ]
+            },
+            src: {
+                month: 6,
+                day: 29,
+                year: 2017,
+                seek: 79200,
+                angle: 5
+            },
             poster: 'http://www.canyon-news.com/wp-content/uploads/2017/06/Big-Brother.jpg',
             cbsUrl: 'http://www.cbs.com',
             loginUrl: 'https://www.cbs.com/account/login/',
@@ -20,7 +43,7 @@ const BBUS = new Vue({
             tokenUrl: 'http://www.cbs.com/shows/big_brother/live_feed/token.json?stream=[stream]',
             timeUrl: 'http://www.cbs.com/sites/big_brother/livefeed/bbtime/',
             cdn: 'akamaihd.net',
-            cam: 5,
+            angle: 5,
             delayedSeek: 0
         }
     },
@@ -29,6 +52,12 @@ const BBUS = new Vue({
     router,
     created () {
         this.registerPlugin(this)
+        PlayerEvents.$on('stop', this.stop)
+        PlayerEvents.$on('switchAngle', this.switchAngle)
+    },
+    beforeDestroy () {
+        PlayerEvents.$off('stop', this.stop)
+        PlayerEvents.$off('switchAngle', this.switchAngle)
     },
     methods: {
         login (user, pass) {
@@ -58,8 +87,16 @@ const BBUS = new Vue({
                     }
                 })
         },
-        play (params) {
-            this.getMedia('?year=' + params.year + '&month=' + ('0' + params.month).slice(-2) + '&day=' + ('0' + params.day).slice(-2))
+        play (src) {
+            if (!src) {
+                this.getMedia('?d=0')
+                this.angle = 5
+                this.delayedSeek = 0
+            } else {
+                this.angle = src.angle
+                this.delayedSeek = src.seek
+                this.getMedia('?year=' + src.year + '&month=' + ('0' + src.month).slice(-2) + '&day=' + ('0' + src.day).slice(-2))
+            }
         },
         getMedia (params) {
             axios.get(this.mediaUrl + params)
@@ -69,7 +106,7 @@ const BBUS = new Vue({
                 })
         },
         getToken (media) {
-            let streamPath = media['ch' + this.cam].hls
+            let streamPath = media['ch' + this.angle].hls
             axios.get(this.tokenUrl.replace('[stream]', streamPath))
                 .then(response => {
                     if (response.data.success) {
@@ -82,6 +119,11 @@ const BBUS = new Vue({
         },
         playStream (url) {
             PlayerEvents.$emit('play', url)
+            PlayerEvents.$emit('provideAngles', this.info.angles)
+        },
+        switchAngle (angle) {
+            this.src.angle = angle
+            this.play(this.src)
         }
     }
 })

@@ -3,7 +3,7 @@
  * This mixin can be added to the Player component to use and control videojs
  */
 
-// import PlayerEvents from './PlayerEvents'
+import AudioPan from './AudioPan'
 
 require('videojs-contrib-media-sources')
 require('videojs-contrib-hls.js')
@@ -24,6 +24,7 @@ export default {
             settings: {
                 liveWindow: 40
             },
+            tech: null,
             streamInfo: {
                 volume: 0,
                 currentTime: 0,
@@ -74,7 +75,7 @@ export default {
             // ]
 
             // expose vjs events
-            var vjsEvents = [ 'timeupdate', 'volumechange' ]
+            var vjsEvents = [ 'loadstart', 'timeupdate', 'volumechange' ]
             for (var i = 0; i < vjsEvents.length; i++) {
                 this.player.on(vjsEvents[i], this.redirectPlayerEvent)
             }
@@ -89,12 +90,13 @@ export default {
             PlayerEvents.$on('seekNormalize', this.seekNormalize)
             PlayerEvents.$on('playbackRate', this.playbackRate)
 
-            PlayerEvents.$on('volume', this.volume)
             PlayerEvents.$on('setQualityIndex', this.setQualityIndex)
             PlayerEvents.$on('goLive', this.goLive)
 
+            PlayerEvents.$on('volume', this.volume)
             PlayerEvents.$on('muted', this.muted)
             PlayerEvents.$on('toggleMute', this.toggleMute)
+            PlayerEvents.$on('setAudioPan', this.setAudioPan)
 
             PlayerEvents.$on('pip', this.togglePip)
 
@@ -140,6 +142,9 @@ export default {
         },
         toggleMute () {
             this.muted(!this.player.muted())
+        },
+        setAudioPan (which) {
+            AudioPan.pan(which)
         },
         pause () {
             if (this.paused()) {
@@ -191,7 +196,12 @@ export default {
             this.player.play()
         },
         redirectPlayerEvent (event) {
-            if (event.type === 'timeupdate') {
+            if (event.type === 'loadstart') {
+                // hook player tech for audio pan
+                this.tech = this.player.tech({ IWillNotUseThisInPlugins: true })
+                AudioPan.init()
+                AudioPan.connect(this.tech.el())
+            } else if (event.type === 'timeupdate') {
                 this.streamInfo.currentTime = (this.currentTime() !== undefined) ? this.currentTime() : -1
                 this.streamInfo.duration = (this.duration() !== undefined) ? this.duration() : -1
                 this.streamInfo.currentHHMMSS = (this.streamInfo.currentTime !== -1) ? this.toHHMMSS(this.streamInfo.currentTime) : ''

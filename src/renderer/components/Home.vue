@@ -1,6 +1,6 @@
 <template>
     <div class="fill fade">
-        <volume></volume>
+        <audio-controls></audio-controls>
         <speed></speed>
         <angles></angles>
         <control-bar ref="controlBar"></control-bar>
@@ -10,7 +10,7 @@
 <script>
     import Utils from '@/mixins/Utils'
     import ControlBar from './Controls/ControlBar'
-    import Volume from './Controls/Volume'
+    import AudioControls from './Controls/AudioControls'
     import Speed from './Controls/Speed'
     import Angles from './Controls/Angles'
 
@@ -18,7 +18,7 @@
 
     export default {
         name: 'home',
-        components: { ControlBar, Volume, Speed, Angles },
+        components: { ControlBar, AudioControls, Speed, Angles },
         data () {
             return {
                 hideEnable: true,

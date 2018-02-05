@@ -11,9 +11,10 @@ const Plugins = {
         registerPlugin (plugin) {
             if (!plugin.id) {
                 console.error('plugin must have an id!')
-            } else if (store.state.plugins[plugin.id]) {
-                console.error('plugin ' + plugin.id + ' already exists!')
             } else {
+                if (store.state.plugins[plugin.id]) {
+                    console.warn('plugin ' + plugin.id + ' already exists, overwriting!')
+                }
                 store.state.plugins[plugin.id] = plugin
                 console.log('registered plugin ' + plugin.id)
             }

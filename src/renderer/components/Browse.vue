@@ -1,16 +1,31 @@
 <template>
     <div class="page">
         <div class="container">
-            <h2>Browse</h2>
+            <h2>Browse: {{path}}</h2>
         </div>
         <div class="container" style="flex-grow:1; overflow:auto;">
-            <div v-if="items" class="card ui" tabIndex="-1" style="cursor:pointer;" @click.prevent="play(item)" :key="item.title" v-for="item in items">
-                <img v-bind:src="item.poster" />
-                <div class="content">
-                    <h1>{{item.title}}</h1>
-                    <p>{{item.desc}}</p>
-                </div>
+            <!-- Back poster -->
+            <div class="card ui" tabindex="-1" @click="routePrevious">
+                <h1 style="position: absolute; bottom: 0.2em;">Back</h1>
             </div>
+            <template v-if="items">
+                <!-- Item Folders -->
+                <div v-if="item.folder" class="card folder ui" tabIndex="-1" @click.prevent="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
+                    <img v-if="item.poster" v-bind:src="item.poster" />
+                    <div v-if="item.title || item.desc" class="content">
+                        <h1>{{item.title}}</h1>
+                        <p>{{item.desc}}</p>
+                    </div>
+                </div>
+                <!-- Single Items -->
+                <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.prevent="play(item)" :key="item.id" v-for="item in filter" >
+                    <img v-bind:src="item.poster" />
+                    <div v-if="item.title || item.desc" class="content">
+                        <h1>{{item.title}}</h1>
+                        <p>{{item.desc}}</p>
+                    </div>
+                </div>
+            </template>
         </div>
         <div class="container">
             <router-link to="/" tag="button">Back</router-link>
@@ -22,6 +37,7 @@
 <i18n>
 {
     "en": {
+        "back": "Back",
         "refresh": "Force Refresh"
     }
 }
@@ -36,7 +52,6 @@
     require('@/plugins/BBUS')
     require('@/plugins/Livestream')
     require('@/plugins/UtopiaNL')
-    require('@/plugins/Twitch')
 
     const { PlayerEvents } = require('./Player/PlayerEvents')
     
@@ -46,9 +61,13 @@
         mixins: [ Plugins ],
         data () {
             return {
+                fetchRemote: true,
                 lastFetch: 0,
                 updateFreq: 300,
-                items: []
+                all: [],
+                items: [],
+                filter: [],
+                path: ''
             }
         },
         mounted () {
@@ -56,46 +75,92 @@
             if (this.items.length === 0 || Date.now() > this.lastFetch + this.updateFreq) {
                 this.updateFreq = Date.now()
                 this.fetch()
+                this.filterItems(this.$route.query)
             }
             this.$extendedInput.selectEl()
         },
         methods: {
             fetch () {
                 this.items = []
-
-                // add plugin items
                 let plugins = this.getPlugins()
-                Object.keys(plugins).forEach(key => this.items.push(plugins[key]))
+                // add all plugin media to this.items
+                Object.keys(plugins).forEach(id => {
+                    if (plugins[id].media || plugins[id].src) this.addItem(plugins[id])
+                })
 
                 // fetch remote items
-                axios.get('http://goodiesfor.me/bbviewer/content')
-                    .then((response) => {
-                        if (response.data && response.data.items) response.data.items.forEach(item => this.items.push(item))
-                    })
-                    .catch((err) => {
-                        console.log('error getting content: ' + err)
-                    })
+                if (this.fetchRemote) {
+                    axios.get('http://goodiesfor.me/bbviewer/content')
+                        .then(response => {
+                            Object.keys(response.data.media).forEach(m => {
+                                this.addItem(response.data.media[m], '')
+                            })
+                            this.filterItems({ path: this.path })
+                        })
+                        .catch((err) => {
+                            console.log('error getting content: ' + err)
+                        })
+                }
+            },
+            addItem (media, path) {
+                media = {
+                    id: media.id,
+                    title: media.title,
+                    desc: media.desc,
+                    poster: media.poster,
+                    media: media.media,
+                    path: path || '',
+                    handler: media.handler,
+                    src: media.src
+                }
+                if (!media.media) delete media.media
+                if (!media.src) delete media.src
+                if (!media.handler) delete media.handler
+                if (media.media) {
+                    media.folder = true
+                    Object.keys(media.media).forEach(m => this.addItem(media.media[m], media.path + '/' + media.id))
+                    delete media.media
+                } else {
+                    media.folder = false
+                    // media.path = media.path.substr(0, media.path.length - media.id.length - 1)
+                }
+                this.items.push(media)
+            },
+            filterItems (query) {
+                if (query && query.path) {
+                    this.filter = this.items.filter(val => val.path === query.path)
+                } else {
+                    this.filter = this.items.filter(val => val.path === '')
+                    // this.filter = this.items.filter(val => (val.folder && val.path === '') || (!val.folder && val.src && val.path === ''))
+                }
             },
             play (item) {
                 if (item.handler) {
-                    if (item.src) {
-                        // play item
-                        this.getPlugin(item.handler).play(item.src)
-                        this.$router.push('/')
-                    } else {
-                        // browse plugin
-                        console.log('browse plugin: ' + item.id)
-                        this.$router.push('/browse/' + item.id)
-                    }
+                    console.log('playing with handler: ' + item.handler)
+                    this.getPlugin(item.handler).play(item)
+                    this.$router.push('/')
                 } else if (item.src) {
                     this.playerRedirect('play', item.src)
                     this.$router.push('/')
                 } else {
-                    console.warn('cannot play unrecognized item')
+                    console.warn('couldn\'t play unrecognized item')
                 }
             },
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)
+            },
+            routePrevious () {
+                if (this.path) {
+                    this.path = (this.path.split('/').length > 0) ? this.path.substr(0, this.path.lastIndexOf('/')) : null
+                    this.filterItems({ path: this.path })
+                } else {
+                    this.$router.push('/')
+                }
+            },
+            routeTo (path) {
+                this.path = path
+                this.filterItems({ path: this.path })
+                this.$router.push('/browse?path=' + path)
             }
         }
     }
@@ -108,14 +173,18 @@
         background-color: #111;
         border: 2px solid #222;
         box-sizing: border-box;
-        margin: 1em;
+        margin: 0.5em;
         padding: 0.5em;
-        width: 10em;
-        height: 12em;
+        width: 8em;
+        height: 10em;
+        cursor:pointer;
     }
 
+    .card.folder {
+        background-color:rgb(55, 11, 80);
+    }
+    
     .card:focus {
-        background-color: #111;
         border: 1px solid chartreuse;
     }
 

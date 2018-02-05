@@ -8,43 +8,19 @@ const { PlayerEvents } = require('../components/Player/PlayerEvents')
 const BBUS = new Vue({
     data () {
         return {
-            id: 'bbus19',
-            handler: 'bbus19',
-            title: 'Big Brother 19 Live Feeds',
+            id: 'bbuslf',
+            title: 'Big Brother Live Feeds',
             desc: '',
-            info: {
-                season: '19',
-                bookmarks: 'http://goodiesfor.me/bigbrother/data/bookmarks?s=bbus19&t=bbviewer',
-                feedsStart: '1498536000',
-                feedsEnd: '1505959200',
-                feedsStartDay: '7',
-                DSTStart: '1489302000',
-                DSTEnd: '1509865200',
-                angles: [
-                    { id: 1, label: '1', desc: 'Cam 1' },
-                    { id: 2, label: '2', desc: 'Cam 2' },
-                    { id: 3, label: '3', desc: 'Cam 3' },
-                    { id: 4, label: '4', desc: 'Cam 4' },
-                    { id: 5, label: 'Q', desc: 'Quad Cam' },
-                    { id: 6, label: 'T', desc: 'Thumbs Cam' }
-                ]
-            },
-            src: {
-                month: 6,
-                day: 29,
-                year: 2017,
-                seek: 79200,
-                angle: 5
-            },
-            poster: 'http://www.canyon-news.com/wp-content/uploads/2017/06/Big-Brother.jpg',
+            poster: 'static/media/bbus.jpg',
             cbsUrl: 'http://www.cbs.com',
             loginUrl: 'https://www.cbs.com/account/login/',
             mediaUrl: 'http://www.cbs.com/sites/big_brother/livefeed/bbmedia/',
             tokenUrl: 'http://www.cbs.com/shows/big_brother/live_feed/token.json?stream=[stream]',
             timeUrl: 'http://www.cbs.com/sites/big_brother/livefeed/bbtime/',
             cdn: 'akamaihd.net',
-            angle: 5,
-            delayedSeek: 0
+            item: null,
+            angle: null,
+            delayedSeek: null
         }
     },
     components: { PlayerEvents },
@@ -54,14 +30,17 @@ const BBUS = new Vue({
         this.registerPlugin(this)
         PlayerEvents.$on('stop', this.stop)
         PlayerEvents.$on('switchAngle', this.switchAngle)
+        PlayerEvents.$on('requestBookmarks', this.requestBookmarks)
     },
     beforeDestroy () {
         PlayerEvents.$off('stop', this.stop)
         PlayerEvents.$off('switchAngle', this.switchAngle)
+        PlayerEvents.$off('requestBookmarks', this.requestBookmarks)
     },
     methods: {
         login (user, pass) {
             // this should trigger ui login, then redirect back to play
+            // TODO use jsonp? gets error
             axios.get(this.cbsUrl)
                 .then(response => {
                     // get login token
@@ -76,7 +55,7 @@ const BBUS = new Vue({
                         formData.append('j_username', user)
                         formData.append('j_password', pass)
                         formData.append('tk_trp', token)
-                        axios.post(this.loginUrl, formData)
+                        axios.get(this.loginUrl)
                             .then(response => {
                                 if (response.data.success) {
                                     console.log('you are logged in!')
@@ -87,26 +66,54 @@ const BBUS = new Vue({
                     }
                 })
         },
-        play (src) {
-            if (!src) {
-                this.getMedia('?d=0')
-                this.angle = 5
-                this.delayedSeek = 0
+        play (item) {
+            this.item = item
+            if (!this.angle) this.angle = (item.src.defaults) ? item.src.defaults.angle : 5
+            if (item.src.useCBSMedia) {
+                // get media data from CBS
+                if (!item.src.defaults) {
+                    this.getMedia('?d=0')
+                    this.delayedSeek = 0
+                } else {
+                    if (!this.delayedSeek) this.delayedSeek = item.src.defaults.seek
+                    this.getMedia('?year=' + item.src.defaults.year + '&month=' + ('0' + item.src.defaults.month).slice(-2) + '&day=' + ('0' + item.src.defaults.day).slice(-2))
+                }
             } else {
-                this.angle = src.angle
-                this.delayedSeek = src.seek
-                this.getMedia('?year=' + src.year + '&month=' + ('0' + src.month).slice(-2) + '&day=' + ('0' + src.day).slice(-2))
+                // use custom media data
+                if (!item.src.defaults) {
+                    // use today if no date specified
+                    let today = new Date()
+                    // TODO NEED MOMENT.JS
+                    item.src.defaults = { month: ('0' + (today.getMonth() + 1)).slice(-2), day: ('0' + today.getDate()).slice(-2), year: today.getFullYear().toString().substr(-2) }
+                }
+                let dt = ('0' + item.src.defaults.month).slice(-2) + ('0' + item.src.defaults.day).slice(-2) + item.src.defaults.year.toString().substr(-2)
+                let m = { cp: item.src.data.cp }
+                for (var i = 1; i <= 6; i++) {
+                    m['ch' + i] = { hls: 'BBLIVE' + dt + 'x' + item.src.data.codes[dt].id + '_' + this.angle + '@' + item.src.data.codes[dt].stream }
+                }
+                console.dir(m)
+                this.getToken(m)
             }
         },
+        stop () {
+            this.item = null
+        },
         getMedia (params) {
-            axios.get(this.mediaUrl + params)
+            // TODO use jsonp? gets error
+            axios.get(this.mediaUrl)
                 .then(response => {
-                    let stripped = response.data.replace('json_media(', '').replace(');', '').replace(/'/g, '"').replace('d:', '"d":').replace('n:', '"n":').replace('cp:', '"cp":').replace('ch1:', '"ch1":').replace('ch2:', '"ch2":').replace('ch3:', '"ch3":').replace('ch4:', '"ch4":').replace('ch5:', '"ch5":').replace('ch6:', '"ch6":').replace(/sync:/g, '"sync":').replace(/flash:/g, '"flash":').replace(/hls:/g, '"hls":')
-                    this.getToken(JSON.parse(stripped))
+                    if (response.data.error) {
+                        console.error(response.data.error)
+                    } else {
+                        let stripped = response.data.replace('json_media(', '').replace(');', '').replace(/'/g, '"').replace('d:', '"d":').replace('n:', '"n":').replace('cp:', '"cp":').replace('ch1:', '"ch1":').replace('ch2:', '"ch2":').replace('ch3:', '"ch3":').replace('ch4:', '"ch4":').replace('ch5:', '"ch5":').replace('ch6:', '"ch6":').replace(/sync:/g, '"sync":').replace(/flash:/g, '"flash":').replace(/hls:/g, '"hls":')
+                        this.getToken(JSON.parse(stripped))
+                    }
                 })
         },
         getToken (media) {
+            console.log('token for cam ' + this.angle)
             let streamPath = media['ch' + this.angle].hls
+            // TODO use jsonp? gets error
             axios.get(this.tokenUrl.replace('[stream]', streamPath))
                 .then(response => {
                     if (response.data.success) {
@@ -119,11 +126,15 @@ const BBUS = new Vue({
         },
         playStream (url) {
             PlayerEvents.$emit('play', url)
-            PlayerEvents.$emit('provideAngles', this.info.angles)
+            PlayerEvents.$emit('provideAngles', this.item.src.angles)
+        },
+        requestBookmarks () {
+            if (this.item.src && this.item.src.bookmarks) PlayerEvents.$emit('provideBookmarks', this.item.src.bookmarks)
         },
         switchAngle (angle) {
-            this.src.angle = angle
-            this.play(this.src)
+            this.angle = angle
+            console.dir(this.item)
+            this.play(this.item)
         }
     }
 })

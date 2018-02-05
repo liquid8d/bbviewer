@@ -1,7 +1,7 @@
 import Vue from 'vue'
-import axios from 'axios'
 import Plugins from '../mixins/Plugins'
 
+const jsonp = require('jsonp')
 const { PlayerEvents } = require('../components/Player/PlayerEvents')
 
 const UtopiaNLPlugin = new Vue({
@@ -10,7 +10,7 @@ const UtopiaNLPlugin = new Vue({
             id: 'utopia-nl',
             title: 'Utopia NL',
             desc: '',
-            poster: 'http://www.utopiatv.nl/version/1513595886/data/locale/nl_NL/image/logo-utopia.png',
+            poster: 'static/media/utopia.png',
             handler: 'utopia-nl',
             src: 'stream_live_1',
             llToken: null,
@@ -34,46 +34,40 @@ const UtopiaNLPlugin = new Vue({
         browse (path) {
             // return browseable content
         },
-        play (src) {
+        play (item) {
             // play path
             if (!this.llToken || this.llExpires < Date.now()) {
                 // fetch a new long lived token
-                this.fetchLLToken(this.urlLongLived.replace('[timestamp]', Date.now()), src)
+                this.fetchLLToken(this.urlLongLived.replace('[timestamp]', Date.now()), item.src)
             } else {
                 // have long lived token, just need auth token for this stream
-                this.fetchAuthToken(src)
+                this.fetchAuthToken(item.src)
             }
         },
         fetchLLToken (url, id) {
-            axios.get(url)
-                .then(response => {
-                    if (response.data.success) {
-                        this.llToken = response.data.authToken
-                        this.llExpire = response.data.time
-                        this.fetchAuthToken(id)
-                    } else {
-                        console.error('long lived token request not successful')
-                    }
-                })
-                .catch(err => {
-                    console.error('error retrieving long lived token: ' + err)
-                })
+            jsonp(url, null, (err, data) => {
+                if (err) {
+                    console.error('long lived token request not successful: ' + err)
+                } else {
+                    this.llToken = data.authToken
+                    this.llExpire = data.time
+                    this.fetchAuthToken(id)
+                }
+            })
         },
         fetchAuthToken (id) {
             var url = this.urlAuthToken.replace('[authToken]', this.llToken)
                 .replace('[stream]', id)
                 .replace('[platform]', this.platform)
                 .replace('[timestamp', Date.now())
-            axios.get(url)
-                .then(response => {
-                    if (response.data.success) {
-                        this.authToken = response.data.token
-                        PlayerEvents.$emit('play', response.data.url + '&dw=20')
-                    } else {
-                        console.error('auth token request not successful')
-                    }
-                })
-                .catch(err => console.error('error retrieving auth token: ' + err))
+            jsonp(url, null, (err, data) => {
+                if (err) {
+                    console.error('auth token request not successful')
+                } else {
+                    this.authToken = data.token
+                    PlayerEvents.$emit('play', data.url + '&dw=20')
+                }
+            })
         }
     }
 })

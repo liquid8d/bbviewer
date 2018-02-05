@@ -1,7 +1,7 @@
 <template>
     <div class="box" v-if="angles && angles.length > 0">
         <span>{{$t('angles')}}</span>
-        <button class="icon" @click="switchAngle(angle.id)" :title="$t(angle.desc)" :key="angle.id" v-for="angle in angles">{{angle.label}}</button>
+        <button class="icon" @click="switchAngle(angle.id)" :title="angle.desc" :key="angle.id" v-for="angle in angles">{{angle.label}}</button>
     </div>
 </template>
 

@@ -23,13 +23,13 @@ const ExtendedInput = {
             }
         },
         selector: [
-            'button:not([disabled])',
-            'a:not([disabled])',
-            'ol > li:not([disabled])',
-            'ul > li:not([disabled])',
-            'div.ui:not([disabled])',
-            'input:not([disabled])',
-            'textarea:not([disabled])'
+            'button:not([display=none]):not([disabled])',
+            'a:not([display=none]):not([disabled])',
+            'ol > li:not([display=none]):not([disabled])',
+            'ul > li:not([display=none]):not([disabled])',
+            'div.ui:not([display=none]):not([disabled])',
+            'input:not([display=none]):not([disabled])',
+            'textarea:not([display=none]):not([disabled])'
         ]
     },
     install (vue, options) {

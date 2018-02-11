@@ -1,14 +1,14 @@
 <template>
-    <div class="box" v-if="angles && angles.length > 0">
-        <span>{{$t('angles')}}</span>
-        <button class="icon" @click="switchAngle(angle.id)" :title="angle.desc" :key="angle.id" v-for="angle in angles">{{angle.label}}</button>
+    <div v-if="angles && angles.length > 0">
+        <button  class="icon" @click="switchAngle(angle.id)" :title="angle.desc" :key="angle.id" v-for="angle in angles">{{angle.label}}</button>
     </div>
+    <span v-else>{{$t('none')}}</span>
 </template>
 
 <i18n>
 {
     "en": {
-        "angles": "Angles"
+        "none": "None"
     }
 }
 </i18n>

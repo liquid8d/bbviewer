@@ -12,8 +12,12 @@
             <button class="icon" @mousedown.stop @click="playerRedirect('seek', 300)" v-bind:title="$t('seek')"><img src="~@/assets/controls/ic_skip_next_white_48px.svg" /></button>
         </template>
         <template slot="right">
+            <!-- <template v-if="this.environment() === 'development'"> -->
+            <router-link class="icon" to="dev" tag="button" @mousedown.stop v-bind:title="$t('dev')"><img src="~@/assets/controls/ic_build_white_48px.svg" /></router-link>
+            <!-- </template> -->
+            <button class="icon" @mousedown.stop @click="screenshot()" v-bind:title="$t('screenshot')"><img src="~@/assets/controls/ic_camera_alt_white_48px.svg" /></button>
+            <button class="icon" @mousedown.stop @click="playerRedirect('toggleMenu')" v-bind:title="$t('more')"><img src="~@/assets/controls/ic_more_horiz_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="fullscreen()" v-bind:title="$t('fullscreen')"><img src="~@/assets/controls/ic_fullscreen_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="toggle" v-bind:title="$t('more')"><img src="~@/assets/controls/ic_more_horiz_white_48px.svg" /></button>
         </template>
     </bar>
 </template>
@@ -22,8 +26,10 @@
 {
     "en": {
         "browse": "Browse",
+        "dev": "Dev Tools",
         "fullscreen": "Fullscreen",
         "more": "More",
+        "screenshot": "Screenshot",
         "seek": "Seek",
         "stop": "Stop"
     }
@@ -33,20 +39,16 @@
 <script>
     import Utils from '@/mixins/Utils'
     import Bar from '../Bar'
-    import Secondary from './Secondary'
     const { PlayerEvents } = require('../Player/PlayerEvents')
     export default {
         name: 'primary',
-        components: { Bar, Secondary, PlayerEvents },
+        components: { Bar, PlayerEvents },
         mixins: [ Utils ],
         mounted () {
             this.preventDraggables()
             this.$extendedInput.selectEl(this.$refs.browse)
         },
         methods: {
-            toggle () {
-                this.$parent.view = Secondary
-            },
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)
             }

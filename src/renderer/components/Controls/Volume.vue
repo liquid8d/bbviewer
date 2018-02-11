@@ -1,27 +1,15 @@
 <template>
-    <div class="box">
-        <vue-slider class="volume-slider" @valuechange="playerRedirect('volume', $event)"></vue-slider>
+    <div>
         <button class="icon" @click.stop.prevent="playerRedirect('toggleMute')" v-bind:title="$t('mute')"><img src="~@/assets/controls/ic_volume_off_white_48px.svg" /></button>
-        <span>Audio Pan</span>
-        <button class="icon" @click="playerRedirect('setAudioPan', 'left')">L</button>
-        <button class="icon" @click="playerRedirect('setAudioPan', 'center')">C</button>
-        <button class="icon" @click="playerRedirect('setAudioPan', 'right')">R</button>
+        <vue-slider class="volume-slider" @valuechange="playerRedirect('volume', $event)"></vue-slider>
     </div>
 </template>
-
-<i18n>
-{
-    "en": {
-        "mute": "Mute"
-    }
-}
-</i18n>
 
 <script>
     import Slider from './Slider'
     const { PlayerEvents } = require('../Player/PlayerEvents')
     export default {
-        name: 'audioControls',
+        name: 'volume-control',
         components: { 'vue-slider': Slider, PlayerEvents },
         methods: {
             playerRedirect (event, arg) {
@@ -32,14 +20,8 @@
 </script>
 
 <style scoped>
-    .box {
-        display: inline-flex;
-        justify-content: center;
-        align-items:center;
-        min-width: 8em;
-    }
     .volume-slider {
-        min-width: 6em;
+        min-width: 4em;
     }
     .volume-slider >>> .slidebar {
         background-color:rgb(83, 83, 83);

@@ -1,8 +1,6 @@
 <template>
     <div class="fill fade">
-        <audio-controls></audio-controls>
-        <speed></speed>
-        <angles></angles>
+        <control-menu></control-menu>
         <control-bar ref="controlBar"></control-bar>
     </div>
 </template>
@@ -10,19 +8,17 @@
 <script>
     import Utils from '@/mixins/Utils'
     import ControlBar from './Controls/ControlBar'
-    import AudioControls from './Controls/AudioControls'
-    import Speed from './Controls/Speed'
-    import Angles from './Controls/Angles'
+    import ControlMenu from './Controls/ControlMenu'
 
     var hideTimer
 
     export default {
         name: 'home',
-        components: { ControlBar, AudioControls, Speed, Angles },
+        components: { ControlBar, ControlMenu },
         data () {
             return {
                 hideEnable: true,
-                hideTimeout: 5000
+                hideTimeout: 4000
             }
         },
         mixins: [ Utils ],
@@ -69,10 +65,7 @@
     pointer-events: none;
     transition-property: opacity;
     transition-duration: 0.5s;
-}
-
-.fade > * {
-    pointer-events: auto;
+    pointer-events: all;
 }
 
 </style>

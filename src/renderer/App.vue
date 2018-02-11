@@ -1,8 +1,8 @@
 <template>
     <div id="app">
-      <backdrop style="z-index: 0;"></backdrop>
-      <player ref="player"></player>
-      <router-view style="z-index: 2;"></router-view>
+        <backdrop style="z-index: 0;"></backdrop>
+        <player ref="player"></player>
+        <router-view style="z-index: 2;"></router-view>
     </div>
 </template>
 
@@ -154,5 +154,28 @@ button.icon:focus > span {
 button.icon > img {
     width: 1.5em;
     height: 1.5em;
+}
+
+
+.pills {
+    display: inline;
+    padding: 0.5em;
+    min-width: 6em;
+}
+
+.pills > button {
+    border-radius: 0;
+    min-width: 2.5em;
+    margin: 0;
+    padding: 0;
+    /* margin: 0.25em 0 0.25em 0; */
+}
+
+.pills > button:first-child {
+    border-radius: 0.5em 0 0 0.5em;
+}
+
+.pills > button:last-child {
+    border-radius: 0 0.5em 0.5em 0;
 }
 </style>

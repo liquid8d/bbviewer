@@ -28,8 +28,10 @@
     }
     .bar > .col.left {
         justify-content: flex-start;
+        max-width: 20%;
     }
     .bar > .col.right {
         justify-content: flex-end;
+        max-width: 20%;
     }
 </style>

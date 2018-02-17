@@ -13,7 +13,7 @@
                 </template>
             </div>
             <div class="pad">
-                <a @click="open('https://github.com/SimulatedGREG/electron-vue')"><img src="~@/assets/logo.png"></a>
+                <a @click="open('https://github.com/SimulatedGREG/electron-vue')"><img src="/static/logo.png"></a>
                 <p v-t="'credits.electron-vue'"></p>
             </div>
             <router-link to="/" tag="button">{{ $t('back') }}</router-link>

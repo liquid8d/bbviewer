@@ -1,6 +1,5 @@
 <template>
     <div>
-        <button class="icon" @click.stop.prevent="playerRedirect('toggleMute')" v-bind:title="$t('mute')"><img src="~@/assets/controls/ic_volume_off_white_48px.svg" /></button>
         <vue-slider class="volume-slider" @valuechange="playerRedirect('volume', $event)"></vue-slider>
     </div>
 </template>
@@ -21,7 +20,7 @@
 
 <style scoped>
     .volume-slider {
-        min-width: 4em;
+        min-width: 6em;
     }
     .volume-slider >>> .slidebar {
         background-color:rgb(83, 83, 83);

@@ -1,6 +1,4 @@
 import Vue from 'vue'
-const path = require('path')
-require('@/assets/cursor.png')
 
 const Mouse = new Vue('mouse', {
     name: 'mouse',
@@ -8,7 +6,7 @@ const Mouse = new Vue('mouse', {
         return {
             config: {
                 enabled: false,
-                cursor: path.join(__dirname, '/cursor.png').replace(/\\/g, '\\\\'),
+                cursor: '/static/cursor.png',
                 cursorEl: 'ui-cursor'
             }
         }

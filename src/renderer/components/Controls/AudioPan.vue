@@ -1,15 +1,17 @@
 <template>
     <div class="pills">
-        <button @click="playerRedirect('setAudioPan', 'left')">L</button>
-        <button @click="playerRedirect('setAudioPan', 'center')">C</button>
-        <button @click="playerRedirect('setAudioPan', 'right')">R</button>
+        <button @click="playerRedirect('setAudioPan', 'left')">{{$t('left')}}</button>
+        <button @click="playerRedirect('setAudioPan', 'center')">{{$t('center')}}</button>
+        <button @click="playerRedirect('setAudioPan', 'right')">{{$t('right')}}</button>
     </div>
 </template>
 
 <i18n>
 {
     "en": {
-        "mute": "Mute"
+        "left": "L",
+        "center": "C",
+        "right": "R"
     }
 }
 </i18n>

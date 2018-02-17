@@ -13,19 +13,19 @@ const AudioPan = {
         if (this.initialized) return
         try {
             var AudioContext = window.AudioContext || window.webkitAudioContext
+            this.context = new AudioContext()
+            this.gainL = this.context.createGain()
+            this.gainR = this.context.createGain()
+            this.gainL.gain.value = 1
+            this.gainR.gain.value = 1
+            this.merger = this.context.createChannelMerger(2)
+            this.splitter = this.context.createChannelSplitter(2)
+            // this.oscillator = this.context.createOscillator()
+            this.initialized = true
+            console.log('audio pan initialized')
         } catch (e) {
             console.log('couldnt get audiocontext: ' + e)
         }
-        this.context = new AudioContext()
-        this.gainL = this.context.createGain()
-        this.gainR = this.context.createGain()
-        this.gainL.gain.value = 1
-        this.gainR.gain.value = 1
-        this.merger = this.context.createChannelMerger(2)
-        this.splitter = this.context.createChannelSplitter(2)
-        // this.oscillator = this.context.createOscillator()
-        this.initialized = true
-        console.log('audio pan initialized')
     },
     connect (node, output, input) {
         try {

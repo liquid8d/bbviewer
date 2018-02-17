@@ -160,19 +160,18 @@ button.icon > img {
 .pills {
     display: inline;
     padding: 0.5em;
-    min-width: 6em;
 }
 
 .pills > button {
+    float: left;
     border-radius: 0;
     min-width: 2.5em;
     margin: 0;
-    padding: 0;
-    /* margin: 0.25em 0 0.25em 0; */
 }
 
 .pills > button:first-child {
     border-radius: 0.5em 0 0 0.5em;
+    padding-left: 0.5em;
 }
 
 .pills > button:last-child {

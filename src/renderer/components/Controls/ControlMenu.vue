@@ -17,15 +17,26 @@
             <angles></angles>
         </div>
         <div class="item">
-            <span>{{$t('more')}}</span>
-            <button class="icon" @mousedown.stop @click="$router.push('/bookmarks')" v-bind:title="$t('bookmarks')"><img src="~@/assets/controls/ic_bookmark_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="$router.push('notifications')" v-bind:title="$t('notifications')"><img src="~@/assets/controls/ic_new_releases_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="playerRedirect('pip')" v-bind:title="$t('pip')"><img src="~@/assets/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="setWindowOnTop()" v-bind:title="$t('ontop')"><img src="~@/assets/controls/ic_flip_to_front_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="createNewWindow()" v-bind:title="$t('window')"><img src="~@/assets/controls/ic_open_in_new_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="$router.push('/donate')" v-bind:title="$t('donate')"><img src="~@/assets/controls/ic_monetization_on_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="$router.push('/about')" v-bind:title="$t('about')"><img src="~@/assets/controls/ic_info_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="$router.push('/settings')" v-bind:title="$t('settings')"><img src="~@/assets/controls/ic_settings_white_48px.svg" /></button>
+            <span></span>
+            <div>
+                <button class="icon" @mousedown.stop @click="$router.push('/bookmarks')" v-bind:title="$t('bookmarks')"><img src="/static/controls/ic_bookmark_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('notifications')" v-bind:title="$t('notifications')"><img src="/static/controls/ic_new_releases_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="playerRedirect('pip')" v-bind:title="$t('pip')"><img src="/static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
+            </div>
+        </div>
+        <div class="item">
+            <span></span>
+            <div>
+                <button class="icon" @mousedown.stop @click="createNewWindow()" v-bind:title="$t('window')"><img src="/static/controls/ic_open_in_new_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('/donate')" v-bind:title="$t('donate')"><img src="/static/controls/ic_monetization_on_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('/about')" v-bind:title="$t('about')"><img src="/static/controls/ic_info_white_48px.svg" /></button>
+            </div>
+        </div>
+        <div class="item">
+            <span></span>
+            <div>
+                <button class="icon" @mousedown.stop @click="$router.push('/settings')" v-bind:title="$t('settings')"><img src="/static/controls/ic_settings_white_48px.svg" /></button>
+            </div>
         </div>
     </div>
 </template>
@@ -34,7 +45,7 @@
 {
     "en": {
         "about": "About",
-        "angles": "Angles",
+        "angles": "Multi-Angle",
         "audio-pan": "Audio Pan",
         "bookmarks": "Bookmarks",
         "donate": "Donate",
@@ -84,19 +95,30 @@
         display: none;
         flex-direction: column;
         position: absolute;
+        bottom: 5em;
         right: 0.5em;
-        bottom: 4.75em;
-        top: 0.5em;
-        justify-content: center;
         border: 0.05em solid #444;
         padding: 0.25em;
-        overflow-y: auto;
         width: 33%;
         min-width: 12em;
         max-width: 16em;
+        min-height: 3em;
+        overflow: auto;
     }
     .menu > .item {
+        display: flex;
+        flex-direction: row;
         margin: 0.05em;
-        padding: 0.5em;
+        padding: 0 0.5em 0 0.5em;
+    }
+
+    .menu > .item > :first-child {
+        display: flex;
+        flex-grow: 1;
+        align-items: center;
+    }
+
+    .menu > .item > :nth-child(2) {
+        flex-grow: 0;
     }
 </style>

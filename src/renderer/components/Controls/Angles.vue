@@ -1,8 +1,8 @@
 <template>
-    <div v-if="angles && angles.length > 0">
+    <div v-if="angles && angles.length > 0" class="pills">
         <button  class="icon" @click="switchAngle(angle.id)" :title="angle.desc" :key="angle.id" v-for="angle in angles">{{angle.label}}</button>
     </div>
-    <span v-else>{{$t('none')}}</span>
+    <button v-else>{{$t('none')}}</button>
 </template>
 
 <i18n>

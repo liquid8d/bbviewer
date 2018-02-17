@@ -94,7 +94,6 @@ export default {
             PlayerEvents.$on('goLive', this.goLive)
 
             PlayerEvents.$on('volume', this.volume)
-            PlayerEvents.$on('muted', this.muted)
             PlayerEvents.$on('toggleMute', this.toggleMute)
             PlayerEvents.$on('setAudioPan', this.setAudioPan)
 
@@ -136,15 +135,6 @@ export default {
             } else {
                 this.seekTo(this.player.duration())
             }
-        },
-        muted (muted) {
-            return this.player.muted(muted)
-        },
-        toggleMute () {
-            this.muted(!this.player.muted())
-        },
-        setAudioPan (which) {
-            AudioPan.pan(which)
         },
         pause () {
             if (this.paused()) {
@@ -234,8 +224,18 @@ export default {
         seeking () {
             return this.player.seeking()
         },
+        setAudioPan (which) {
+            AudioPan.pan(which)
+        },
         setQualityIndex (idx) {
             console.log('no quality index implementation yet')
+        },
+        setMuted (muted) {
+            this.player.muted(muted)
+            PlayerEvents.$emit('muted', muted)
+        },
+        toggleMute () {
+            this.setMuted(!this.player.muted())
         },
         volume (val) {
             if (val) this.player.volume(val)

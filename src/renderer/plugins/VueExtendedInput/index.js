@@ -6,6 +6,7 @@ import Touch from './Touch'
 
 const ExtendedInput = {
     state: {
+        enabled: true,
         inputMethod: 'keyboard'
     },
     config: {
@@ -50,6 +51,7 @@ const ExtendedInput = {
         console.log('Extended Input initialized')
     },
     onKey (key) {
+        if (!this.state.enabled) return
         if (key === 'select') {
             // perform select action for this element
             this.config.select()

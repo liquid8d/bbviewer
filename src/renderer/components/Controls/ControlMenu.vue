@@ -19,24 +19,24 @@
         <div class="item">
             <span></span>
             <div>
-                <button class="icon" @mousedown.stop @click="setWindowOnTop()" v-bind:title="$t('ontop')"><img src="/static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
-                <button class="icon" @mousedown.stop @click="$router.push('/bookmarks')" v-bind:title="$t('bookmarks')"><img src="/static/controls/ic_bookmark_white_48px.svg" /></button>
-                <button class="icon" @mousedown.stop @click="$router.push('notifications')" v-bind:title="$t('notifications')"><img src="/static/controls/ic_new_releases_white_48px.svg" /></button>
-                <button class="icon" @mousedown.stop @click="playerRedirect('pip')" v-bind:title="$t('pip')"><img src="/static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="setWindowOnTop()" v-bind:title="$t('ontop')"><img src="static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('/bookmarks')" v-bind:title="$t('bookmarks')"><img src="static/controls/ic_bookmark_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('notifications')" v-bind:title="$t('notifications')"><img src="static/controls/ic_new_releases_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="playerRedirect('pip')" v-bind:title="$t('pip')"><img src="static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
             </div>
         </div>
         <div class="item">
             <span></span>
             <div>
-                <button class="icon" @mousedown.stop @click="createNewWindow()" v-bind:title="$t('window')"><img src="/static/controls/ic_open_in_new_white_48px.svg" /></button>
-                <button class="icon" @mousedown.stop @click="$router.push('/donate')" v-bind:title="$t('donate')"><img src="/static/controls/ic_monetization_on_white_48px.svg" /></button>
-                <button class="icon" @mousedown.stop @click="$router.push('/about')" v-bind:title="$t('about')"><img src="/static/controls/ic_info_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="createNewWindow()" v-bind:title="$t('window')"><img src="static/controls/ic_open_in_new_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('/donate')" v-bind:title="$t('donate')"><img src="static/controls/ic_monetization_on_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('/about')" v-bind:title="$t('about')"><img src="static/controls/ic_info_white_48px.svg" /></button>
             </div>
         </div>
         <div class="item">
             <span></span>
             <div>
-                <button class="icon" @mousedown.stop @click="$router.push('/settings')" v-bind:title="$t('settings')"><img src="/static/controls/ic_settings_white_48px.svg" /></button>
+                <button class="icon" @mousedown.stop @click="$router.push('/settings')" v-bind:title="$t('settings')"><img src="static/controls/ic_settings_white_48px.svg" /></button>
             </div>
         </div>
     </div>

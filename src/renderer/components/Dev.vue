@@ -3,10 +3,10 @@
         <div class="container stretch">
             <h1>{{ $t('dev') }}</h1>
             <h2>Routes</h2>
-                <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="/static/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
-                <button class="icon" @mousedown.stop v-bind:title="$t('flashbacks')"><img src="/static/controls/ic_history_white_48px.svg" /><span>{{$t('flashbacks')}}</span></button>
-                <button class="icon" @mousedown.stop v-bind:title="$t('cast')"><img src="/static/controls/ic_cast_white_48px.svg" /><span>{{$t('cast')}}</span></button>
-                <button @click="$router.push('auth')" class="icon" @mousedown.stop v-bind:title="$t('auth')"><img src="/static/controls/ic_vpn_key_white_48px.svg" /><span>{{$t('auth')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="static/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('flashbacks')"><img src="static/controls/ic_history_white_48px.svg" /><span>{{$t('flashbacks')}}</span></button>
+                <button class="icon" @mousedown.stop v-bind:title="$t('cast')"><img src="static/controls/ic_cast_white_48px.svg" /><span>{{$t('cast')}}</span></button>
+                <button @click="$router.push('auth')" class="icon" @mousedown.stop v-bind:title="$t('auth')"><img src="static/controls/ic_vpn_key_white_48px.svg" /><span>{{$t('auth')}}</span></button>
             <h2>Player Control</h2>
                 <button @click="playerRedirect('aspectRatio', '4:3')">ASPECT 4:3</button>
                 <button @click="playerRedirect('aspectRatio', '16:9')">ASPECT 16:9</button>
@@ -25,10 +25,10 @@
                 <button @click="dir = chooseFolder()">Choose Folder</button>
                 <button @click="resizeWindow(640,360)">Resize Window</button>
                 <button @click="setWindowTitle('Test')">Set Window Title</button>
-                <button class="icon" @mousedown.stop @click="restartApp()" v-bind:title="$t('restart')"><img src="/static/controls/ic_refresh_white_48px.svg" /><span>{{$t('restart')}}</span></button>
+                <button class="icon" @mousedown.stop @click="restartApp()" v-bind:title="$t('restart')"><img src="static/controls/ic_refresh_white_48px.svg" /><span>{{$t('restart')}}</span></button>
         </div>
         <div class="container">
-            <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="/static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
+            <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
         </div>
     </div>
 </template>

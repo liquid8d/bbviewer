@@ -1,5 +1,5 @@
 <template>
-    <img src="/static/icon.png">
+    <img src="static/icon.png">
 </template>
 
 <style scoped>

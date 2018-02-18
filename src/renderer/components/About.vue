@@ -1,7 +1,7 @@
 <template>
     <div class="page overlay">
         <div class="container stretch">
-            <span class="title" v-t="'about'"></span>
+            <h2 class="title" v-t="'about'"></h2>
             <div class="items">
                 <div class="item">Version: <span class="value">{{ $store.state.version }}</span></div>
                 <div class="item">Build: <span class="value">{{ $store.state.build }}</span></div>
@@ -26,6 +26,8 @@
 <i18n>
 {
     "en": {
+        "about": "About",
+        "back": "Back",
         "credits": {
             "electron-vue": "Thank you to electron-vue for a semi-sane way to build electron-vue + web apps!"
         }

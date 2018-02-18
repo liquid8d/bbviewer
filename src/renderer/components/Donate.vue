@@ -20,6 +20,7 @@
 <i18n>
 {
     "en": {
+        "back": "Back",
         "title": "Donate",
         "label": "Thank you for your support!",
         "desc": "You can donate to help support the development of BBViewer via PayPal by clicking the link below.",

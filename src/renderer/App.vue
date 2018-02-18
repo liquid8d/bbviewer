@@ -2,9 +2,9 @@
     <div id="app" @mouseleave="hideControls">
         <div v-if="$store.state.isElectron" ref="titlebar" class="titlebar">
             <span>{{$t('title')}}</span>
-            <img src="/static/controls/ic_remove_white_48px.svg" @click.stop="rendererEvent('window.minimize')" />
-            <img src="/static/controls/ic_settings_overscan_white_48px.svg" @click.stop="rendererEvent('window.maximize')" />
-            <img src="/static/controls/ic_clear_white_48px.svg" @click.stop="rendererEvent('app.quit')" />
+            <img src="static/controls/ic_remove_white_48px.svg" @click.stop="minimizeWindow()" />
+            <img src="static/controls/ic_settings_overscan_white_48px.svg" @click.stop="maximizeWindow()" />
+            <img src="static/controls/ic_clear_white_48px.svg" @click.stop="quit()" />
         </div>
         <div class="app-container">
             <backdrop style="z-index: 0;"></backdrop>
@@ -64,9 +64,6 @@ export default {
         this.$extendedInput.Gamepad.$off('key', this.showControls)
     },
     methods: {
-        rendererEvent (event, arg) {
-            require('electron').ipcRenderer.send(event, arg)
-        },
         hideControls () {
             if (this.hideEnable) {
                 if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
@@ -75,10 +72,8 @@ export default {
             }
         },
         showControls () {
-            if (this.hideEnable) {
-                clearTimeout(hideTimer)
-                hideTimer = setTimeout(e => this.hideControls, this.hideTimeout)
-            }
+            clearTimeout(hideTimer)
+            hideTimer = setTimeout(e => this.hideControls(), this.hideTimeout)
             if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'flex'
             if (document.querySelector('.controls')) document.querySelector('.controls').style.display = ''
         }

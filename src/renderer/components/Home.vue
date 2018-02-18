@@ -1,7 +1,7 @@
 <template>
     <div class="page">
         <div class="container" style="flex-shrink: 0;flex-grow:1;">
-            <control-menu></control-menu>
+            <angles></angles>
         </div>
         <div class="container">
             <control-bar ref="controlBar"></control-bar>
@@ -11,12 +11,12 @@
 
 <script>
     import Utils from '@/mixins/Utils'
+    import Angles from './Controls/Angles'
     import ControlBar from './Controls/ControlBar'
-    import ControlMenu from './Controls/ControlMenu'
 
     export default {
         name: 'home',
-        components: { ControlBar, ControlMenu },
+        components: { ControlBar, Angles },
         mixins: [ Utils ],
         mounted () {
             this.preventDraggables()

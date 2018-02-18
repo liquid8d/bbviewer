@@ -6,6 +6,7 @@
             <img src="static/controls/ic_settings_overscan_white_48px.svg" @click.stop="maximizeWindow()" />
             <img src="static/controls/ic_clear_white_48px.svg" @click.stop="closeWindow()" />
         </div>
+        <div v-if="$store.state.isElectron" class="app-border"></div>
         <div class="app-container">
             <backdrop style="z-index: 0;"></backdrop>
             <player ref="player"></player>
@@ -110,10 +111,10 @@ html, body {
     border: 1px solid rgba(50,50,50,0.8);
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(100,100,100,1.0);
+    background: rgb(75, 75, 75);
 }
 ::-webkit-scrollbar-thumb:window-inactive {
-    background: rgba(100,100,100,0.75); 
+    background: rgba(75,75,75,0.75); 
 }
 ::-webkit-scrollbar-corner { background: rgba(0,0,0,0); }
 
@@ -125,7 +126,17 @@ html, body {
     right: 0;
     bottom: 0;
     left: 0;
-    border: 0.05em solid #111;
+}
+
+.app-border {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    box-shadow: 0 0 0 0.05em #111 inset;
+    z-index: 99;
+    pointer-events: none;
 }
 
 .app-container {
@@ -147,7 +158,7 @@ html, body {
 }
 
 .page.overlay {
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.75);
 }
 
 .page > .container {

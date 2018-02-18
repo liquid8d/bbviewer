@@ -3,7 +3,7 @@
         <div v-if="$store.state.isElectron" ref="titlebar" class="titlebar">
             <span>{{$t('title')}}</span>
             <img src="static/controls/ic_remove_white_48px.svg" @click.stop="minimizeWindow()" />
-            <img src="static/controls/ic_settings_overscan_white_48px.svg" @click.stop="maximizeWindow()" />
+            <img src="static/controls/ic_zoom_out_map_white_48px.svg" @click.stop="maximizeWindow()" />
             <img src="static/controls/ic_clear_white_48px.svg" @click.stop="closeWindow()" />
         </div>
         <div v-if="$store.state.isElectron" class="app-border"></div>

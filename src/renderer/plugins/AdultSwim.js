@@ -11,13 +11,6 @@ const AdultSwimPlugin = new Vue({
             title: 'Adult Swim',
             desc: 'Watch free Adult Swim streams',
             poster: 'static/media/adult-swim.jpg',
-            media: [
-                { id: 'animation-marathon', title: 'Animation Marathon', desc: '', poster: 'https://i.cdn.turner.com/adultswim/big/img/2018/01/09/Animation2_Marathon.jpg', handler: 'adult-swim', src: { id: 'Xv-Zn5pcTZO0bmiWd8ZgNw' } },
-                { id: 'toonami', title: 'Toonami', desc: '', poster: 'https://i.cdn.turner.com/adultswim/big/video/toonami/Toonami_Stream_Share_Image_16x9.jpg', handler: 'adult-swim', src: { id: 'fimTbVMdSK-ZRye6iQF4uA' } },
-                { id: 'williams', title: 'Williams Stream', desc: '', poster: 'https://i.cdn.turner.com/adultswim/big/img/2017/08/29/WS_thumbs.jpg', handler: 'adult-swim', src: { id: 'd8DEBj7QRfetLsRgFnGEyg' } },
-                { id: 'rick-and-morty-marathon', title: 'Rick and Morty Marathon', desc: '', poster: 'https://i.cdn.turner.com/adultswim/big/img/2018/01/09/RickMorty2_Marathon_2.jpg', handler: 'adult-swim', src: { id: 'jqX79_YeQkm3I9kHJYGAXA' } },
-                { id: 'venture-bros', title: 'The Venture Bros.', desc: '', poster: 'https://i.cdn.turner.com/adultswim/big/video/the-venture-bros/venturebros_mt.jpg', handler: 'adult-swim', src: { id: '5g7-O12-SeWvBbfTKnI9CA' } }
-            ],
             apiBase: 'http://www.adultswim.com/videos/api/v3/',
             apiVideos: 'http://www.adultswim.com/videos/api/v3/videos/',
             params: 'fields=stream'

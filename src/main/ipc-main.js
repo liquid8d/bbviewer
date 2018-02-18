@@ -66,6 +66,11 @@ ipcMain.on('window.maximize', (event, arg) => {
     if (!focused.isMaximized()) focused.maximize(); else focused.restore()
 })
 
+ipcMain.on('window.close', (event, arg) => {
+    let focused = BrowserWindow.getFocusedWindow()
+    focused.close()
+})
+
 ipcMain.on('app.quit', () => {
     app.quit()
 })

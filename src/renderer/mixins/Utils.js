@@ -120,6 +120,11 @@ const Utils = {
             require('electron').ipcRenderer.send('window.maximize')
             // #endif
         },
+        closeWindow () {
+            // #if process.env.BUILD_TARGET !== 'web'
+            require('electron').ipcRenderer.send('window.close')
+            // #endif
+        },
         quit () {
             // #if process.env.BUILD_TARGET !== 'web'
             require('electron').ipcRenderer.send('app.quit')

@@ -4,7 +4,7 @@
             <span>{{$t('title')}}</span>
             <img src="static/controls/ic_remove_white_48px.svg" @click.stop="minimizeWindow()" />
             <img src="static/controls/ic_settings_overscan_white_48px.svg" @click.stop="maximizeWindow()" />
-            <img src="static/controls/ic_clear_white_48px.svg" @click.stop="quit()" />
+            <img src="static/controls/ic_clear_white_48px.svg" @click.stop="closeWindow()" />
         </div>
         <div class="app-container">
             <backdrop style="z-index: 0;"></backdrop>

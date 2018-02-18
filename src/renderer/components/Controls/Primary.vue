@@ -17,7 +17,7 @@
             <router-link class="icon" to="dev" tag="button" @mousedown.stop v-bind:title="$t('dev')"><img src="static/controls/ic_build_white_48px.svg" /></router-link>
             <!-- </template> -->
             <button class="icon" @mousedown.stop @click="screenshot()" v-bind:title="$t('screenshot')"><img src="static/controls/ic_camera_alt_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="playerRedirect('showMenu')" v-bind:title="$t('more')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
+            <button class="icon" @mousedown.stop @click="$router.push('menu')" v-bind:title="$t('more')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="fullscreen()" v-bind:title="$t('fullscreen')"><img src="static/controls/ic_fullscreen_white_48px.svg" /></button>
         </template>
     </bar>

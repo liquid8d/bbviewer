@@ -14,7 +14,6 @@
 
 <style>
     .player, .vjs-v6, .vjs-v6 > video {
-        display: block;
         position: absolute;
         width: 100%;
         height: 100%;

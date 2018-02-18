@@ -1,6 +1,6 @@
 <template>
-    <div class="page">
-        <div class="container">
+    <div class="page overlay">
+        <div class="container stretch">
             <span class="title" v-t="'about'"></span>
             <div class="items">
                 <div class="item">Version: <span class="value">{{ $store.state.version }}</span></div>
@@ -16,7 +16,9 @@
                 <a @click="open('https://github.com/SimulatedGREG/electron-vue')"><img src="/static/logo.png"></a>
                 <p v-t="'credits.electron-vue'"></p>
             </div>
-            <router-link to="/" tag="button">{{ $t('back') }}</router-link>
+        </div>
+        <div class="container">
+            <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="/static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
         </div>
     </div>
 </template>

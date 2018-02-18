@@ -12,6 +12,7 @@ ipcMain.on('window.new', () => {
         : `file://${__dirname}/index.html`
 
     let win = new BrowserWindow({
+        frame: process.env.NODE_ENV === 'development',
         title: 'BBViewer',
         width: 800,
         height: 450,
@@ -53,6 +54,20 @@ ipcMain.on('window.ontop', (event, arg) => {
 ipcMain.on('window.title', (event, arg) => {
     let focused = BrowserWindow.getFocusedWindow()
     focused.setTitle(arg.title)
+})
+
+ipcMain.on('window.minimize', (event, arg) => {
+    let focused = BrowserWindow.getFocusedWindow()
+    focused.minimize()
+})
+
+ipcMain.on('window.maximize', (event, arg) => {
+    let focused = BrowserWindow.getFocusedWindow()
+    if (!focused.isMaximized()) focused.maximize(); else focused.restore()
+})
+
+ipcMain.on('app.quit', () => {
+    app.quit()
 })
 
 // restart app

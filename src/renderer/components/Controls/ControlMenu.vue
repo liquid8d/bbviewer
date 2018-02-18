@@ -19,6 +19,7 @@
         <div class="item">
             <span></span>
             <div>
+                <button class="icon" @mousedown.stop @click="setWindowOnTop()" v-bind:title="$t('ontop')"><img src="/static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
                 <button class="icon" @mousedown.stop @click="$router.push('/bookmarks')" v-bind:title="$t('bookmarks')"><img src="/static/controls/ic_bookmark_white_48px.svg" /></button>
                 <button class="icon" @mousedown.stop @click="$router.push('notifications')" v-bind:title="$t('notifications')"><img src="/static/controls/ic_new_releases_white_48px.svg" /></button>
                 <button class="icon" @mousedown.stop @click="playerRedirect('pip')" v-bind:title="$t('pip')"><img src="/static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
@@ -76,14 +77,15 @@
         mixins: [ Utils ],
         mounted () {
             this.preventDraggables()
-            PlayerEvents.$on('toggleMenu', this.toggleMenu)
+            PlayerEvents.$on('showMenu', this.showMenu)
         },
         methods: {
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)
             },
-            toggleMenu () {
-                this.$el.style.display = (this.$el.style.display === 'none' || this.$el.style.display === '') ? 'flex' : 'none'
+            showMenu (visible) {
+                if (visible === undefined) visible = this.$el.style.display === 'none' || this.$el.style.display === ''
+                this.$el.style.display = (visible) ? 'flex' : 'none'
             }
         }
     }

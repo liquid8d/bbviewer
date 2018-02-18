@@ -1,18 +1,18 @@
 <template>
-    <div class="page">
+    <div class="page overlay">
         <div class="container">
             <h1>{{ $t('title') }}</h1>
         </div>
-        <div class="container">
-            <webview ref="browser" v-if="$store.state.isElectron" :src="url"></webview>
-            <div v-else class="browser-donate">
+        <div class="backdrop" style="flex-grow:1">
+            <webview v-if="$store.state.isElectron" ref="browser" :src="url"></webview>
+            <div v-else class="container">
                 <h1>{{ $t('label') }}</h1>
                 <p>{{ $t('desc') }}</p>
                 <a :href="url" target="_blank">{{ $t('link') }}</a>
             </div>
         </div>
         <div class="container">
-            <router-link to="/" tag="button">{{ $t('back') }}</router-link>
+            <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="/static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
         </div>
     </div>
 </template>
@@ -29,8 +29,18 @@
 </i18n>
 
 <style scoped>
+    .backdrop {
+        background-color: #222;
+        position: relative;
+        margin: 0.5em;
+        padding: 0;
+    }
     webview {
-        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
 </style>
 

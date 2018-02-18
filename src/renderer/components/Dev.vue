@@ -1,6 +1,6 @@
 <template>
-    <div class="page">
-        <div class="container">
+    <div class="page overlay">
+        <div class="container stretch">
             <h1>{{ $t('dev') }}</h1>
             <h2>Routes</h2>
                 <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="/static/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
@@ -28,7 +28,7 @@
                 <button class="icon" @mousedown.stop @click="restartApp()" v-bind:title="$t('restart')"><img src="/static/controls/ic_refresh_white_48px.svg" /><span>{{$t('restart')}}</span></button>
         </div>
         <div class="container">
-            <router-link to="/" tag="button">{{ $t('back') }}</router-link>
+            <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="/static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
         </div>
     </div>
 </template>

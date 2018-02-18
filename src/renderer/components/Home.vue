@@ -1,7 +1,11 @@
 <template>
-    <div class="fill fade">
-        <control-menu></control-menu>
-        <control-bar ref="controlBar"></control-bar>
+    <div class="page">
+        <div class="container" style="flex-shrink: 0;flex-grow:1;">
+            <control-menu></control-menu>
+        </div>
+        <div class="container">
+            <control-bar ref="controlBar"></control-bar>
+        </div>
     </div>
 </template>
 
@@ -10,62 +14,12 @@
     import ControlBar from './Controls/ControlBar'
     import ControlMenu from './Controls/ControlMenu'
 
-    var hideTimer
-
     export default {
         name: 'home',
         components: { ControlBar, ControlMenu },
-        data () {
-            return {
-                hideEnable: true,
-                hideTimeout: 4000
-            }
-        },
         mixins: [ Utils ],
         mounted () {
             this.preventDraggables()
-            if (this.hideEnable) {
-                this.$el.addEventListener('mousemove', this.showControls, false)
-                this.$extendedInput.Keyboard.$on('key', this.showControls)
-                this.$extendedInput.Gamepad.$on('key', this.showControls)
-            }
-            this.showControls()
-        },
-        beforeDestroy () {
-            this.$el.removeEventListener('mousemove', this.showControls)
-            this.$extendedInput.Keyboard.$off('key', this.showControls)
-            this.$extendedInput.Gamepad.$off('key', this.showControls)
-        },
-        methods: {
-            hideControls () {
-                this.$el.style.opacity = 0
-            },
-            showControls () {
-                if (this.hideEnable) {
-                    clearTimeout(hideTimer)
-                    hideTimer = setTimeout(e => this.hideControls(), this.hideTimeout)
-                    this.$el.style.opacity = 1
-                }
-            }
         }
     }
 </script>
-
-<style scoped>
-.box {
-    display: inline-block;
-    position: relative;
-    border-radius: 0.15em;
-    background: #202529;
-    margin: 0.25em;
-    padding: 0.25em;
-}
-
-.fade {
-    pointer-events: none;
-    transition-property: opacity;
-    transition-duration: 0.5s;
-    pointer-events: all;
-}
-
-</style>

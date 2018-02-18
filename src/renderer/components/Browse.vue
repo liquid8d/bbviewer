@@ -1,16 +1,16 @@
 <template>
-    <div class="page">
+    <div class="page overlay">
         <div class="container">
-            <h2>Browse: {{path}}</h2>
+            <h1>Browse: {{path}}</h1>
         </div>
-        <div class="container" style="flex-grow:1; overflow:auto;">
+        <div class="container stretch">
             <!-- Back poster -->
             <div class="card ui" tabindex="-1" @click="routePrevious">
                 <h1 style="position: absolute; bottom: 0.2em;">Back</h1>
             </div>
             <template v-if="items">
                 <!-- Item Folders -->
-                <div v-if="item.folder" class="card folder ui" tabIndex="-1" @click.prevent="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
+                <div v-if="item.folder" class="card folder ui" tabIndex="-1" @click.stop="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
                     <img v-if="item.poster" v-bind:src="item.poster" />
                     <div v-if="item.title || item.desc" class="content">
                         <h1>{{item.title}}</h1>
@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <!-- Single Items -->
-                <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.prevent="play(item)" :key="item.id" v-for="item in filter" >
+                <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.stop="play(item)" :key="item.id" v-for="item in filter" >
                     <img v-bind:src="item.poster" />
                     <div v-if="item.title || item.desc" class="content">
                         <h1>{{item.title}}</h1>
@@ -28,8 +28,8 @@
             </template>
         </div>
         <div class="container">
-            <router-link to="/" tag="button">Back</router-link>
-            <button class="icon" @mousedown.stop @click="fetch()" v-bind:title="$t('refresh')"><img src="~@/assets/controls/ic_refresh_white_48px.svg" /><span>{{$t('refresh')}}</span></button>
+            <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="/static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
+            <button class="icon" @mousedown.stop @click="fetch()" v-bind:title="$t('refresh')"><img src="/static/controls/ic_refresh_white_48px.svg" /><span>{{$t('refresh')}}</span></button>
         </div>
     </div>
 </template>
@@ -48,6 +48,7 @@
     import Plugins from '../mixins/Plugins'
 
     // content Plugins
+    require('@/plugins/AllAccess')
     require('@/plugins/AdultSwim')
     require('@/plugins/BBUS')
     require('@/plugins/Livestream')
@@ -71,6 +72,7 @@
             }
         },
         mounted () {
+            this.path = this.$route.query.path
             // do fetch
             if (this.items.length === 0 || Date.now() > this.lastFetch + this.updateFreq) {
                 this.updateFreq = Date.now()

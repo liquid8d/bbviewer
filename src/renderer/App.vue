@@ -1,10 +1,26 @@
 <template>
-    <div id="app">
-        <backdrop style="z-index: 0;"></backdrop>
-        <player ref="player"></player>
-        <router-view style="z-index: 2;"></router-view>
+    <div id="app" @mouseleave="hideControls">
+        <div v-if="$store.state.isElectron" ref="titlebar" class="titlebar">
+            <span>{{$t('title')}}</span>
+            <img src="/static/controls/ic_remove_white_48px.svg" @click.stop="rendererEvent('window.minimize')" />
+            <img src="/static/controls/ic_settings_overscan_white_48px.svg" @click.stop="rendererEvent('window.maximize')" />
+            <img src="/static/controls/ic_clear_white_48px.svg" @click.stop="rendererEvent('app.quit')" />
+        </div>
+        <div class="app-container">
+            <backdrop style="z-index: 0;"></backdrop>
+            <player ref="player"></player>
+            <router-view style="z-index: 2;"></router-view>
+        </div>
     </div>
 </template>
+
+<i18n>
+{
+    "en": {
+        "title": "BBViewer"
+    }
+}
+</i18n>
 
 <script>
 import Utils from './mixins/Utils'
@@ -12,19 +28,60 @@ import Backdrop from './components/Backdrop'
 import Player from './components/Player/Player'
 import router from './router'
 
+const { PlayerEvents } = require('./components/Player/PlayerEvents')
+
+var hideTimer
+
 export default {
     name: 'bbviewer',
     mixins: [ Utils ],
-    components: { Backdrop, Player },
+    components: { Backdrop, Player, PlayerEvents },
     router,
+    data () {
+        return {
+            hideEnable: true,
+            hideTimeout: 4000
+        }
+    },
     mounted () {
         console.log('App Ready')
-        this.setDraggable(document.querySelector('#app'))
         this.$extendedInput.init({
             home: function () {
                 router.replace('/')
             }
         })
+        this.setDraggable(document.querySelector('#app'))
+        if (this.hideEnable) {
+            this.$el.addEventListener('mousemove', this.showControls, false)
+            this.$extendedInput.Keyboard.$on('key', this.showControls)
+            this.$extendedInput.Gamepad.$on('key', this.showControls)
+        }
+        this.showControls()
+    },
+    beforeDestroy () {
+        this.$el.removeEventListener('mousemove', this.showControls)
+        this.$extendedInput.Keyboard.$off('key', this.showControls)
+        this.$extendedInput.Gamepad.$off('key', this.showControls)
+    },
+    methods: {
+        rendererEvent (event, arg) {
+            require('electron').ipcRenderer.send(event, arg)
+        },
+        hideControls () {
+            if (this.hideEnable) {
+                if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
+                if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
+                PlayerEvents.$emit('showMenu', false)
+            }
+        },
+        showControls () {
+            if (this.hideEnable) {
+                clearTimeout(hideTimer)
+                hideTimer = setTimeout(e => this.hideControls, this.hideTimeout)
+            }
+            if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'flex'
+            if (document.querySelector('.controls')) document.querySelector('.controls').style.display = ''
+        }
     }
 }
 </script>
@@ -65,39 +122,86 @@ html, body {
 }
 ::-webkit-scrollbar-corner { background: rgba(0,0,0,0); }
 
-#app, .fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+#app {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border: 0.05em solid #111;
 }
 
+.app-container {
+    position: relative;
+    height: 100%;
+}
+
+/* Base page css */
 .page {
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  background-color: rgba(0, 0, 0, 0.85);
-  overflow: auto;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    flex-grow: 1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.page.overlay {
+    background-color: rgba(0, 0, 0, 0.85);
 }
 
 .page > .container {
-  flex-grow: 0;
-  padding: 0.5em;
+    flex-direction: column;
+    padding: 0.5em;
 }
 
-.title {
-  color: #18b353;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 6px;
+.page > .container.stretch {
+    flex-grow: 1;
+    overflow: auto;
+}
+
+/* Window title bar when using Electron */
+.titlebar {
+    display: flex;
+    flex-direction: row;
+    background-color: #1b1f22;
+    position: relative;
+    flex-shrink: 0;
+    flex-grow: 0;
+    padding: 0.3em;
+    width: 100%;
+    height: 1.75em;
+}
+
+.titlebar > span {
+    display: block;
+    flex-shrink: 0;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 0.75em;
+    line-height: 1.75em;
+    color:#18b353;
+}
+
+.titlebar > img {
+    flex-grow: 0;
+    width: 1em;
+    height: 1.25em;
+    margin: 0 0.3em 0 0.3em;
+    pointer-events: all;
+    cursor: pointer;
+}
+
+h1, h2, h3 {
+    color: #18b353;
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
 span, label, a {

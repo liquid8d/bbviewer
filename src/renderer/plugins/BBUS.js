@@ -2,6 +2,7 @@ import Vue from 'vue'
 import router from '../router'
 import axios from 'axios'
 import Plugins from '../mixins/Plugins'
+import Utils from '../mixins/Utils'
 
 const { PlayerEvents } = require('../components/Player/PlayerEvents')
 
@@ -11,12 +12,14 @@ const BBUS = new Vue({
             id: 'bbuslf',
             title: 'Big Brother Live Feeds',
             desc: '',
-            poster: 'static/media/bbus.jpg',
+            poster: 'static/media/bbus.png',
             cbsUrl: 'http://www.cbs.com',
-            loginUrl: 'https://www.cbs.com/account/login/',
+            loginUrl: 'https://www.cbs.com/all-access/user/signin/',
             mediaUrl: 'http://www.cbs.com/sites/big_brother/livefeed/bbmedia/',
             tokenUrl: 'http://www.cbs.com/shows/big_brother/live_feed/token.json?stream=[stream]',
             timeUrl: 'http://www.cbs.com/sites/big_brother/livefeed/bbtime/',
+            authTitle: 'Login to All Access',
+            authDesc: 'This content requires a subscription. Login into your account, then try accessing the content again',
             cdn: 'akamaihd.net',
             item: null,
             angle: null,
@@ -24,47 +27,28 @@ const BBUS = new Vue({
         }
     },
     components: { PlayerEvents },
-    mixins: [ Plugins ],
+    mixins: [ Plugins, Utils ],
     router,
     created () {
         this.registerPlugin(this)
         PlayerEvents.$on('stop', this.stop)
         PlayerEvents.$on('switchAngle', this.switchAngle)
         PlayerEvents.$on('requestBookmarks', this.requestBookmarks)
+        PlayerEvents.$on('loadBookmark', this.loadBookmark)
     },
     beforeDestroy () {
         PlayerEvents.$off('stop', this.stop)
         PlayerEvents.$off('switchAngle', this.switchAngle)
         PlayerEvents.$off('requestBookmarks', this.requestBookmarks)
+        PlayerEvents.$off('loadBookmark', this.loadBookmark)
     },
     methods: {
-        login (user, pass) {
-            // this should trigger ui login, then redirect back to play
-            // TODO use jsonp? gets error
-            axios.get(this.cbsUrl)
-                .then(response => {
-                    // get login token
-                    let loginTokenStart = response.data.indexOf('CBS.Registry.login.authToken')
-                    if (loginTokenStart === -1) {
-                        console.error('couldn\'t login to CBS site')
-                    } else {
-                        let loginTokenEnd = response.data.indexOf('\';', loginTokenStart)
-                        let token = response.data.substring(loginTokenStart + 32, loginTokenEnd)
-                        // do login
-                        let formData = new FormData()
-                        formData.append('j_username', user)
-                        formData.append('j_password', pass)
-                        formData.append('tk_trp', token)
-                        axios.get(this.loginUrl)
-                            .then(response => {
-                                if (response.data.success) {
-                                    console.log('you are logged in!')
-                                } else {
-                                    console.error('error logging in: ' + response.data.message)
-                                }
-                            })
-                    }
-                })
+        loadBookmark (bookmark) {
+            // TODO seek if on same date and cam, if different request new token, then seek
+            // TODO determine play date based on timestamp
+            this.item.src.defaults = { month: bookmark.event_day.split('/')[0], day: bookmark.event_day.split('/')[1], year: bookmark.event_day.split('/')[2].substr(-2), seek: 0, angle: bookmark.channel }
+            this.play(this.item)
+            router.replace('/')
         },
         play (item) {
             this.item = item
@@ -82,8 +66,8 @@ const BBUS = new Vue({
                 // use custom media data
                 if (!item.src.defaults) {
                     // use today if no date specified
-                    let today = new Date()
                     // TODO NEED MOMENT.JS
+                    let today = new Date()
                     item.src.defaults = { month: ('0' + (today.getMonth() + 1)).slice(-2), day: ('0' + today.getDate()).slice(-2), year: today.getFullYear().toString().substr(-2) }
                 }
                 let dt = ('0' + item.src.defaults.month).slice(-2) + ('0' + item.src.defaults.day).slice(-2) + item.src.defaults.year.toString().substr(-2)
@@ -91,7 +75,6 @@ const BBUS = new Vue({
                 for (var i = 1; i <= 6; i++) {
                     m['ch' + i] = { hls: 'BBLIVE' + dt + 'x' + item.src.data.codes[dt].id + '_' + this.angle + '@' + item.src.data.codes[dt].stream }
                 }
-                console.dir(m)
                 this.getToken(m)
             }
         },
@@ -99,7 +82,6 @@ const BBUS = new Vue({
             this.item = null
         },
         getMedia (params) {
-            // TODO use jsonp? gets error
             axios.get(this.mediaUrl)
                 .then(response => {
                     if (response.data.error) {
@@ -111,29 +93,35 @@ const BBUS = new Vue({
                 })
         },
         getToken (media) {
-            console.log('token for cam ' + this.angle)
             let streamPath = media['ch' + this.angle].hls
-            // TODO use jsonp? gets error
-            axios.get(this.tokenUrl.replace('[stream]', streamPath))
-                .then(response => {
-                    if (response.data.success) {
-                        let token = response.data.token.replace('&hdcore=3.1', '')
-                        this.playStream('http://' + media.cp + '.' + this.cdn + '/i/' + streamPath + '/master.m3u8?hdnea=' + token)
+            this.fetchUrl(this.tokenUrl.replace('[stream]', streamPath), {
+                json: true,
+                complete: response => {
+                    if (!response.data.success) {
+                        console.error('error retrieving token, are you logged in?')
+                        // route to authenticate
+                        router.push('/auth?url=' + this.loginUrl + '&title=' + this.authTitle + '&desc=' + this.authDesc)
                     } else {
-                        console.log('you are not logged in')
+                        let token = response.data.token.replace('&hdcore=3.1', '')
+                        console.log('got token: ' + token)
+                        this.playStream('http://' + media.cp + '.' + this.cdn + '/i/' + streamPath + '/master.m3u8?hdnea=' + token)
                     }
-                })
+                }
+            })
         },
         playStream (url) {
             PlayerEvents.$emit('play', url)
             PlayerEvents.$emit('provideAngles', this.item.src.angles)
         },
         requestBookmarks () {
-            if (this.item.src && this.item.src.bookmarks) PlayerEvents.$emit('provideBookmarks', this.item.src.bookmarks)
+            if (this.item && this.item.src && this.item.src.bookmarks) {
+                axios.get(this.item.src.bookmarks).then(response => {
+                    PlayerEvents.$emit('provideBookmarks', response.data)
+                })
+            }
         },
         switchAngle (angle) {
             this.angle = angle
-            console.dir(this.item)
             this.play(this.item)
         }
     }

@@ -7,6 +7,7 @@ export default new Router({
     routes: [
         { path: '/', name: 'home', component: require('@/components/Home').default },
         { path: '/about', name: 'about', component: require('@/components/About').default },
+        { path: '/auth', name: 'auth', component: require('@/components/Auth').default },
         { path: '/browse', name: 'browse', component: require('@/components/Browse').default },
         { path: '/bookmarks', name: 'bookmarks', component: require('@/components/Bookmarks').default },
         { path: '/cast', name: 'cast', component: require('@/components/Cast').default },

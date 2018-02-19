@@ -6,7 +6,7 @@ const Mouse = new Vue('mouse', {
         return {
             config: {
                 enabled: false,
-                cursor: '/static/cursor.png',
+                cursor: 'static/cursor.png',
                 cursorEl: 'ui-cursor'
             }
         }

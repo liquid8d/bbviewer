@@ -122,11 +122,8 @@ const ExtendedInput = {
     },
     selectEl (el) {
         document.body.focus()
-        if (!el) {
-            el = document.querySelector(this.config.selector.join(','))
-            el.focus()
-        }
-        el.focus()
+        if (!el) el = document.querySelector(this.config.selector.join(','))
+        if (el) el.focus()
         // console.log('selected: ' + el.tagName + '[type=' + el.type + '] ' + el.innerHTML)
     },
     Keyboard,

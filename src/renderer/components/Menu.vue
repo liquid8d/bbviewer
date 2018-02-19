@@ -131,7 +131,7 @@
         flex-direction: row;
         align-items: center;
         margin: 0.05em;
-        padding: 0.75em;
+        padding: 0.5em;
         cursor: pointer;
         border-bottom:  0.05em solid #24292e;
     }
@@ -155,5 +155,6 @@
     .menu > .item > .pills {
         display: inline-flex;
         justify-content: center;
+        padding: 0;
     }    
 </style>

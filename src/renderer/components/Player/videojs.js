@@ -26,6 +26,7 @@ export default {
             },
             tech: null,
             streamInfo: {
+                url: '',
                 volume: 0,
                 currentTime: 0,
                 currentHHMMSS: '',
@@ -33,7 +34,8 @@ export default {
                 duration: 0,
                 position: 0,
                 qualities: [],
-                isLiveStream: false
+                isLiveStream: false,
+                isPlayingLive: false
             }
         }
     },
@@ -75,7 +77,7 @@ export default {
             // ]
 
             // expose vjs events
-            var vjsEvents = [ 'loadstart', 'timeupdate', 'volumechange' ]
+            var vjsEvents = [ 'loadstart', 'loadedmetadata', 'timeupdate', 'volumechange' ]
             for (var i = 0; i < vjsEvents.length; i++) {
                 this.player.on(vjsEvents[i], this.redirectPlayerEvent)
             }
@@ -89,21 +91,35 @@ export default {
             PlayerEvents.$on('seekTo', this.seekTo)
             PlayerEvents.$on('seekNormalize', this.seekNormalize)
             PlayerEvents.$on('playbackRate', this.playbackRate)
-
             PlayerEvents.$on('setQualityIndex', this.setQualityIndex)
             PlayerEvents.$on('goLive', this.goLive)
-
             PlayerEvents.$on('volume', this.volume)
             PlayerEvents.$on('toggleMute', this.toggleMute)
             PlayerEvents.$on('setAudioPan', this.setAudioPan)
-
             PlayerEvents.$on('pip', this.togglePip)
 
             console.log('video component ready.')
         }
     },
+    beforeDestroy () {
+        PlayerEvents.$off('aspectRatio', this.aspectRatio)
+        PlayerEvents.$off('play', this.play)
+        PlayerEvents.$off('pause', this.pause)
+        PlayerEvents.$off('stop', this.stop)
+        PlayerEvents.$off('seek', this.seek)
+        PlayerEvents.$off('seekTo', this.seekTo)
+        PlayerEvents.$off('seekNormalize', this.seekNormalize)
+        PlayerEvents.$off('playbackRate', this.playbackRate)
+        PlayerEvents.$off('setQualityIndex', this.setQualityIndex)
+        PlayerEvents.$off('goLive', this.goLive)
+        PlayerEvents.$off('volume', this.volume)
+        PlayerEvents.$off('toggleMute', this.toggleMute)
+        PlayerEvents.$off('setAudioPan', this.setAudioPan)
+        PlayerEvents.$off('pip', this.togglePip)
+    },
     methods: {
         aspectRatio (ratio) {
+            // keep (fit), crop (fill), off (stretch)
             this.player.aspectRatio(ratio)
         },
         currentTime () {
@@ -154,6 +170,7 @@ export default {
             this.player.playbackRate(rate)
         },
         play (src) {
+            if (this.playing()) this.stop()
             if (src.indexOf('.m3u8') >= 0) {
                 // HLS
                 this.player.src({ src: src, type: 'application/x-mpegURL' })
@@ -183,24 +200,52 @@ export default {
             } else {
                 console.warn('unsupported video source')
             }
+            this.streamInfo.url = this.player.currentSrc() || ''
             this.player.play()
         },
         redirectPlayerEvent (event) {
             if (event.type === 'loadstart') {
                 // hook player tech for audio pan
                 this.tech = this.player.tech({ IWillNotUseThisInPlugins: true })
-                AudioPan.init()
-                AudioPan.connect(this.tech.el())
+                console.dir(this.tech)
+                AudioPan.init(this.tech.el())
+            } else if (event.type === 'loadedmetadata') {
+                if (this.tech && this.tech.hls) {
+                    console.log('HLS tech')
+                    this.streamInfo.isLiveStream = !this.tech.hls.playlists.media().endList
+                    for (var i = 0; i < this.tech.hls.representations().length; i++) {
+                        this.streamInfo.qualities.unshift({
+                            id: this.streamInfo.qualities.length,
+                            uri: this.tech.hls.representations()[i].id,
+                            label: this.tech.hls.representations()[i].height + 'p (' + this.convertBytes(this.tech.hls.representations()[i].bandwidth) + ')',
+                            bandwidth: this.tech.hls.representations()[i].bandwidth,
+                            width: this.tech.hls.representations()[i].width,
+                            height: this.tech.hls.representations()[i].height
+                        })
+                    }
+                } else {
+                    console.log('unknown tech')
+                    this.streamInfo.isLiveStream = this.isLiveStream()
+                }
             } else if (event.type === 'timeupdate') {
                 this.streamInfo.currentTime = (this.currentTime() !== undefined) ? this.currentTime() : -1
                 this.streamInfo.duration = (this.duration() !== undefined) ? this.duration() : -1
                 this.streamInfo.currentHHMMSS = (this.streamInfo.currentTime !== -1) ? this.toHHMMSS(this.streamInfo.currentTime) : ''
                 this.streamInfo.durationHHMMSS = (this.streamInfo.duration !== -1) ? this.toHHMMSS(this.streamInfo.duration) : ''
                 this.streamInfo.position = (this.streamInfo.currentTime !== -1 && this.streamInfo.duration !== -1) ? this.streamInfo.currentTime / this.streamInfo.duration : 0
+                if (this.isPlayingLive() !== this.streamInfo.isPlayingLive) {
+                    PlayerEvents.$emit((this.isPlayingLive) ? 'live' : 'notlive')
+                    this.streamInfo.isPlayingLive = this.isPlayingLive()
+                }
             } else if (event.type === 'volumechange') {
                 this.streamInfo.volume = this.player.volume()
             }
             PlayerEvents.$emit('streamInfo', this.streamInfo)
+        },
+        convertBytes (b) {
+            if (b < 1024) return b + 'B'
+            if (b < 1024000) return Math.round(b / 1024) + 'KB'
+            if (b < 1024000000) return Math.round(b / 1024000) + 'MB'
         },
         remainingTime () {
             return this.player.remainingTime()
@@ -252,7 +297,8 @@ export default {
                 duration: 0,
                 position: 0,
                 qualities: [],
-                isLiveStream: false
+                isLiveStream: false,
+                isPlayingLive: false
             }
         },
         toHHMMSS (sec) {

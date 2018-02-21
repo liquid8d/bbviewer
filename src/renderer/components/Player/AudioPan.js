@@ -9,7 +9,7 @@ const AudioPan = {
     splitter: null,
     oscillator: null,
     source: null,
-    init () {
+    init (node) {
         if (this.initialized) return
         try {
             var AudioContext = window.AudioContext || window.webkitAudioContext
@@ -21,6 +21,7 @@ const AudioPan = {
             this.merger = this.context.createChannelMerger(2)
             this.splitter = this.context.createChannelSplitter(2)
             // this.oscillator = this.context.createOscillator()
+            this.connect(node)
             this.initialized = true
             console.log('audio pan initialized')
         } catch (e) {

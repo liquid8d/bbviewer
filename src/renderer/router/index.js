@@ -12,7 +12,6 @@ export default new Router({
         { path: '/bookmarks', name: 'bookmarks', component: require('@/components/Bookmarks').default },
         { path: '/cast', name: 'cast', component: require('@/components/Cast').default },
         { path: '/donate', name: 'donate', component: require('@/components/Donate').default },
-        { path: '/dev', name: 'dev', component: require('@/components/Dev').default },
         { path: '/flashbacks', name: 'flashbacks', component: require('@/components/Flashbacks').default },
         { path: '/menu', name: 'menu', component: require('@/components/Menu').default },
         { path: '/settings', name: 'settings', component: require('@/components/Settings').default },

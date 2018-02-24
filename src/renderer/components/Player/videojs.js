@@ -168,6 +168,7 @@ export default {
         },
         playbackRate (rate) {
             this.player.playbackRate(rate)
+            PlayerEvents.$emit('playbackratechange', rate)
         },
         play (src) {
             if (this.playing()) this.stop()

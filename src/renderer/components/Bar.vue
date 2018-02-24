@@ -17,8 +17,7 @@
         flex-shrink: 0;
         display: flex;
         width: 100%;
-        padding-left: 0.25em;
-        padding-right: 0.25em;
+        padding: 0.25em;
     }
     .bar > .col {
         flex-grow: 1;

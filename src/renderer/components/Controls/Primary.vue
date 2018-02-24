@@ -13,9 +13,7 @@
             <button class="icon" @mousedown.stop @click="playerRedirect('seek', 300)" v-bind:title="$t('seek')"><img src="static/controls/ic_skip_next_white_48px.svg" /></button>
         </template>
         <template slot="right">
-            <!-- <template v-if="this.environment() === 'development'"> -->
-            <router-link class="icon" to="dev" tag="button" @mousedown.stop v-bind:title="$t('dev')"><img src="static/controls/ic_build_white_48px.svg" /></router-link>
-            <!-- </template> -->
+            <button ref="liveButton" class="disabled" @mousedown.stop @click="playerRedirect('goLive')" v-bind:title="$t('live')">{{$t('live')}}</button>
             <button class="icon" @mousedown.stop @click="screenshot()" v-bind:title="$t('screenshot')"><img src="static/controls/ic_camera_alt_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="$router.push('menu')" v-bind:title="$t('more')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="fullscreen()" v-bind:title="$t('fullscreen')"><img src="static/controls/ic_fullscreen_white_48px.svg" /></button>
@@ -27,8 +25,8 @@
 {
     "en": {
         "browse": "Browse",
-        "dev": "Dev Tools",
         "fullscreen": "Fullscreen",
+        "live": "LIVE",
         "more": "More",
         "mute": "Mute",
         "screenshot": "Screenshot",
@@ -50,17 +48,46 @@
             this.preventDraggables()
             this.$extendedInput.selectEl(this.$refs.browse)
             PlayerEvents.$on('muted', this.muted)
+            PlayerEvents.$on('play', this.play)
+            PlayerEvents.$on('live', this.live)
+            PlayerEvents.$on('notLive', this.notLive)
         },
         beforeDestroy () {
             PlayerEvents.$off('muted', this.muted)
+            PlayerEvents.$off('play', this.play)
+            PlayerEvents.$off('live', this.live)
+            PlayerEvents.$off('notLive', this.notLive)
         },
         methods: {
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)
             },
+            live () {
+                if (this.$refs.liveButton) this.$refs.liveButton.style.className = 'live'
+            },
             muted (muted) {
                 if (this.$refs.volumeImage) this.$refs.volumeImage.src = (muted) ? 'static/controls/ic_volume_off_white_48px.svg' : 'static/controls/ic_volume_up_white_48px.svg'
+            },
+            notLive () {
+                if (this.$refs.liveButton) this.$refs.liveButton.style.className = 'notlive'
+            },
+            play () {
+                if (this.$refs.liveButton) this.$refs.liveButton.style.className = 'notlive'
             }
         }
     }
 </script>
+
+<style>
+    .disabled {
+        display: none;
+    }
+    .live {
+        display: block;
+        color: red;
+    }
+    .notlive {
+        display: block;
+        color:slategray;
+    }
+</style>

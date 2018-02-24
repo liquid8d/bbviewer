@@ -7,11 +7,11 @@
             </div>
             <div class="item" tabindex="-1">
                 <img src="static/controls/ic_volume_up_white_48px.svg" />
-                <audio-pan></audio-pan>
+                <volume></volume>
             </div>
             <div class="item" tabindex="-1">
-                <img src="static/controls/ic_volume_up_white_48px.svg" />
-                <volume></volume>
+                <img src="static/controls/ic_speaker_white_48px.svg" />
+                <audio-pan></audio-pan>
             </div>
             <div class="item" tabindex="-1">
                 <img src="static/controls/ic_timelapse_white_48px.svg" />
@@ -25,33 +25,13 @@
                     <button @click="resizeWindow(1280, 720)">{{$t('winLarge')}}</button>
                 </div>
             </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="setWindowOnTop()" v-bind:title="$t('back')">
-                <img src="static/controls/ic_flip_to_front_white_48px.svg" />
-                <span>{{$t('ontop')}}</span>
-            </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="playerRedirect('pip')" v-bind:title="$t('pip')">
-                <img src="static/controls/ic_picture_in_picture_alt_white_48px.svg" />
-                <span>{{$t('pip')}}</span>
-            </div>
             <div class="ui item" tabindex="-1" @mousedown.stop @click="createNewWindow()" v-bind:title="$t('window')">
                 <img src="static/controls/ic_open_in_new_white_48px.svg" />
                 <span>{{$t('window')}}</span>
             </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('bookmarks')" v-bind:title="$t('bookmarks')">
-                <img src="static/controls/ic_bookmark_white_48px.svg" />
-                <span>{{$t('bookmarks')}}</span>
-            </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('flashbacks')" v-bind:title="$t('flashbacks')">
-                <img src="static/controls/ic_history_white_48px.svg" />
-                <span>{{$t('flashbacks')}}</span>
-            </div>
             <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('notifications')" v-bind:title="$t('notifications')">
                 <img src="static/controls/ic_new_releases_white_48px.svg" />
                 <span>{{$t('notifications')}}</span>
-            </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('cast')" v-bind:title="$t('cast')">
-                <img src="static/controls/ic_cast_white_48px.svg" />
-                <span>{{$t('cast')}}</span>
             </div>
             <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('donate')" v-bind:title="$t('donate')">
                 <img src="static/controls/ic_monetization_on_white_48px.svg" />
@@ -73,13 +53,8 @@
     "en": {
         "about": "About",
         "back": "Back",
-        "bookmarks": "Bookmarks",
-        "cast": "Cast",
         "donate": "Donate",
-        "flashbacks": "Flashbacks",
         "notifications": "Notifications",
-        "ontop": "Toggle On Top",
-        "pip": "Picture in Picture",
         "settings": "Settings",
         "window": "New Window",
         "winSmall": "S",

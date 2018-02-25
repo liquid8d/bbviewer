@@ -1,25 +1,20 @@
 <template>
     <div class="controls">
         <div class="bar">
-            <div style="flex-grow:1">
-                <angles></angles>
-            </div>
+            <div ref="videoText" class="video-text"></div>
             <div class="section">
                 <button class="icon" @click="$router.replace('bookmarks')" v-bind:title="$t('bookmarks')"><img src="static/controls/ic_bookmark_white_48px.svg" /></button>
                 <button class="icon" @click="$router.replace('flashbacks')" v-bind:title="$t('flashbacks')"><img src="static/controls/ic_history_white_48px.svg" /></button>
-                <button class="icon" @click="playerRedirect('toggleAudioPan')" v-bind:title="$t('pan')"><img src="static/controls/ic_speaker_white_48px.svg" /><span>{{audioPan}}</span></button>
-                <button class="icon" @click="playerRedirect('toggleSpeed')" v-bind:title="$t('playbackRate')"><img src="static/controls/ic_timelapse_white_48px.svg" /><span>{{playbackRate}}</span></button>
-                <button class="icon" @click="$router.replace('cast')" v-bind:title="$t('cast')"><img src="static/controls/ic_cast_white_48px.svg" /></button>
             </div>
             <div class="section">
-                <button class="icon" @click="setWindowOnTop()" v-bind:title="$t('ontop')"><img src="static/controls/ic_flip_to_front_white_48px.svg" /></button>
-                <button class="icon" @click="playerRedirect('pip')" v-bind:title="$t('pip')"><img src="static/controls/ic_picture_in_picture_alt_white_48px.svg" /></button>
+                <button class="icon" @click="playerRedirect('toggleAngle')" v-bind:title="$t('angle')"><img src="static/controls/ic_videocam_white_48px.svg" /><span>{{angle}}</span></button>
+                <button class="icon" @click="playerRedirect('toggleAudioPan')" v-bind:title="$t('pan')"><img src="static/controls/ic_speaker_white_48px.svg" /><span>{{audioPan}}</span></button>
+                <button class="icon" @click="playerRedirect('toggleSpeed')" v-bind:title="$t('playbackRate')"><img src="static/controls/ic_timelapse_white_48px.svg" /><span>{{playbackRate}}</span></button>
+                <button class="icon" @click="playerRedirect('toggleQuality')" v-bind:title="$t('quality')"><img src="static/controls/ic_equalizer_white_48px.svg" /><span>{{quality}}</span></button>
+                <button class="icon" @click="$router.replace('cast')" v-bind:title="$t('cast')"><img src="static/controls/ic_cast_white_48px.svg" /></button>
             </div>
         </div>
-        <div ref="seekbar" class="seekbar" @mouseover.prevent.stop @click.prevent.stop="onSeekValue">
-            <div ref="seekvalue" class="seekvalue"></div>
-        </div>
-        <label ref="videoText" class="video-text"></label>
+        <vue-slider ref="seekbar" class="seekbar" immediate="false"></vue-slider>
         <component v-bind:is="view"></component>
     </div>
 </template>
@@ -27,19 +22,21 @@
 <i18n>
 {
     "en": {
+        "angle": "Angle",
+        "back": "Back",
         "bookmarks": "Bookmarks",
         "cast": "Cast",
         "flashbacks": "Flashbacks",
-        "ontop": "Toggle On Top",
         "pan": "Audio Pan",
-        "pip": "Picture in Picture",
-        "playbackRate": "Playback Speed"
+        "playbackRate": "Playback Speed",
+        "quality": "Quality"
     }
 }
 </i18n>
 
 <script>
     import Primary from './Primary'
+    import Slider from './Slider'
     import router from '../../router'
     import Angles from './Angles'
     import Utils from '@/mixins/Utils'
@@ -48,12 +45,14 @@
     export default {
         name: 'controlBar',
         router,
-        components: { Angles },
+        components: { Angles, 'vue-slider': Slider },
         mixins: [ Utils ],
         data () {
             return {
+                angle: 1,
                 audioPan: 'C',
                 playbackRate: '1.0',
+                quality: 'Auto',
                 view: Primary
             }
         },
@@ -61,6 +60,7 @@
             PlayerEvents.$on('streamInfo', this.updateInfo)
             PlayerEvents.$on('audiopanchange', this.audiopanchange)
             PlayerEvents.$on('playbackratechange', this.playbackratechange)
+            this.$refs.seekbar.$on('endslide', this.onSeekValue)
         },
         beforeDestroy () {
             PlayerEvents.$off('streamInfo', this.updateInfo)
@@ -78,8 +78,8 @@
                 this.playbackRate = rate
             },
             updateInfo (data) {
-                this.$refs.videoText.innerHTML = data.currentHHMMSS + ' : ' + data.durationHHMMSS
-                this.$refs.seekvalue.style.width = (data.position * 100) + '%'
+                if (this.$refs.videoText) this.$refs.videoText.innerHTML = data.currentHHMMSS + ' : ' + data.durationHHMMSS
+                if (!this.$refs.seekbar.isSliding) this.$refs.seekbar.setValue(data.position)
             },
             onSeekValue (e) {
                 var val = e.offsetX
@@ -122,29 +122,15 @@
     background-color:#18b353;
 }
 
-.seekbar {
-    position: relative;
-    width: 100%;
-    height: 0.2em;
-    background: #444;
-    cursor: pointer;
-}
-
-.seekvalue {
-    position: absolute;
-    display: inline-block;
-    width: 0;
-    height: 0.2em;
-    background:#18b353;
-    pointer-events: none;
-}
-
 .video-text {
+    color:#18b353;
+    font-size: 0.75em;
+    flex-grow: 1;
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
     position: relative;
     margin: 0.25em;
-    height: 1em;
 }
 </style>

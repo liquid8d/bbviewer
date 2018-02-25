@@ -14,7 +14,7 @@
                 default: true
             },
             dragSize: {
-                default: 14
+                default: 12
             }
         },
         data () {
@@ -53,6 +53,7 @@
                 if (!this.isSliding) return
                 this.isSliding = false
                 this.updateSlide(e)
+                this.$emit('endslide', e)
             },
             onCancelSlide (e) {
                 if (!this.isSliding) return
@@ -69,6 +70,7 @@
             updateDrag (val) {
                 var position = parseInt(window.getComputedStyle(this.$refs.slidebar).width) * val - (this.dragSize / 2)
                 this.$refs.drag.style.left = position + 'px'
+                this.$refs.drag.style.top = '-4px'
             },
             clamp (num, min, max) {
                 return num <= min ? min : num >= max ? max : num
@@ -96,9 +98,10 @@
 <style scoped>
     .container {
         position: relative;
+        margin: 0 0.5em 0 0.5em;
+        padding: 0.75em 0 0.75em 0;
         height: 0.75em;
-        margin: 0.1em 0 0.25em 0;
-        width: 100%;
+        overflow: hidden;
     }
     .slidebar {
         flex-grow: 1;
@@ -116,7 +119,7 @@
         position: absolute;
         width: 0;
         height: 100%;
-        background: rgb( 90, 200, 20 );
+        background: #18b353;
         pointer-events: none;
     }
 
@@ -124,7 +127,7 @@
         position: absolute;
         border-radius: 50%;
         border: 1px solid rgb( 20, 20, 20 );
-        background: rgb( 90, 200, 20 );
+        background: #18b353;
         left: -2px;
         top: -5px;
         width: 16px;

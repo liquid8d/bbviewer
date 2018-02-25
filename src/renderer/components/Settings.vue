@@ -32,7 +32,9 @@
     "en": {
         "account": "Accounts",
         "auth": "Authenticate",
-        "restart": "Restart App"
+        "back": "Back",
+        "restart": "Restart App",
+        "settings": "Settings"
     }
 }
 </i18n>

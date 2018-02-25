@@ -15,7 +15,7 @@
         <template slot="right">
             <button ref="liveButton" class="disabled" @mousedown.stop @click="playerRedirect('goLive')" v-bind:title="$t('live')">{{$t('live')}}</button>
             <button class="icon" @mousedown.stop @click="screenshot()" v-bind:title="$t('screenshot')"><img src="static/controls/ic_camera_alt_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="$router.push('menu')" v-bind:title="$t('more')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
+            <button class="icon" @mousedown.stop @click="showMenu" v-bind:title="$t('more')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="fullscreen()" v-bind:title="$t('fullscreen')"><img src="static/controls/ic_fullscreen_white_48px.svg" /></button>
         </template>
     </bar>
@@ -73,6 +73,9 @@
             },
             play () {
                 if (this.$refs.liveButton) this.$refs.liveButton.style.className = 'notlive'
+            },
+            showMenu () {
+                PlayerEvents.$emit('toggleMenu')
             }
         }
     }

@@ -7,7 +7,7 @@
                 <button class="icon" @click="$router.replace('flashbacks')" v-bind:title="$t('flashbacks')"><img src="static/controls/ic_history_white_48px.svg" /></button>
             </div>
             <div class="section">
-                <button class="icon" @click="playerRedirect('toggleAngle')" v-bind:title="$t('angle')"><img src="static/controls/ic_videocam_white_48px.svg" /><span>{{angle}}</span></button>
+                <button class="icon" @click.capture="playerRedirect('toggleAngle')" v-bind:title="$t('angle')"><img src="static/controls/ic_videocam_white_48px.svg" /><span>{{angle}}</span></button>
                 <button class="icon" @click="playerRedirect('toggleAudioPan')" v-bind:title="$t('pan')"><img src="static/controls/ic_speaker_white_48px.svg" /><span>{{audioPan}}</span></button>
                 <button class="icon" @click="playerRedirect('toggleSpeed')" v-bind:title="$t('playbackRate')"><img src="static/controls/ic_timelapse_white_48px.svg" /><span>{{playbackRate}}</span></button>
                 <button class="icon" @click="playerRedirect('toggleQuality')" v-bind:title="$t('quality')"><img src="static/controls/ic_equalizer_white_48px.svg" /><span>{{quality}}</span></button>
@@ -38,18 +38,17 @@
     import Primary from './Primary'
     import Slider from './Slider'
     import router from '../../router'
-    import Angles from './Angles'
     import Utils from '@/mixins/Utils'
 
     const { PlayerEvents } = require('../Player/PlayerEvents')
     export default {
         name: 'controlBar',
         router,
-        components: { Angles, 'vue-slider': Slider },
+        components: { 'vue-slider': Slider },
         mixins: [ Utils ],
         data () {
             return {
-                angle: 1,
+                angle: '',
                 audioPan: 'C',
                 playbackRate: '1.0',
                 quality: 'Auto',
@@ -58,18 +57,24 @@
         },
         mounted () {
             PlayerEvents.$on('streamInfo', this.updateInfo)
+            PlayerEvents.$on('anglechange', this.anglechange)
             PlayerEvents.$on('audiopanchange', this.audiopanchange)
             PlayerEvents.$on('playbackratechange', this.playbackratechange)
             this.$refs.seekbar.$on('endslide', this.onSeekValue)
         },
         beforeDestroy () {
             PlayerEvents.$off('streamInfo', this.updateInfo)
+            PlayerEvents.$off('anglechange', this.anglechange)
             PlayerEvents.$off('audiopanchange', this.audiopanchange)
             PlayerEvents.$off('playbackratechange', this.playbackratechange)
+            this.$refs.seekbar.$off('endslide', this.onSeekValue)
         },
         methods: {
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)
+            },
+            anglechange (which) {
+                this.angle = which
             },
             audiopanchange (which) {
                 this.audioPan = (which === 'left') ? 'L' : (which === 'right') ? 'R' : 'C'
@@ -102,11 +107,10 @@
     border-left: 0.05em solid #2a2a2a;
 }
 .controls {
-    position: absolute;
+    position: relative;
     bottom: 0;
     left: 0;
     right: 0;
-    /* height: 4.25em; */
     background: #1b1f22;
 }
 

@@ -1,53 +1,25 @@
 <template>
-    <div class="page overlay">
-        <div class="menu">
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')">
-                <img src="static/controls/ic_chevron_left_white_48px.svg" />
-                <span>{{$t('back')}}</span>
-            </div>
-            <div class="item" tabindex="-1">
-                <img src="static/controls/ic_volume_up_white_48px.svg" />
-                <volume></volume>
-            </div>
-            <div class="item" tabindex="-1">
-                <img src="static/controls/ic_speaker_white_48px.svg" />
-                <audio-pan></audio-pan>
-            </div>
-            <div class="item" tabindex="-1">
-                <img src="static/controls/ic_timelapse_white_48px.svg" />
-                <speed></speed>
-            </div>
-            <div class="item" tabindex="-1">
-                <img src="static/controls/ic_settings_overscan_white_48px.svg" />
-                <div class="pills">
+    <div class="menu">
+        <template v-for="item in items">
+            <div v-if="item.content" v-bind:key="item.id" class="item">
+                <img v-if="item.icon" :src="item.icon" class="icon" />
+                <volume v-if="item.content === 'volume'"></volume>
+                <audio-pan v-if="item.content === 'audiopan'"></audio-pan>
+                <speed v-if="item.content === 'playbackrate'"></speed>
+                <div v-if="item.content === 'resize'" class="pills">
                     <button @click="resizeWindow(640, 360)">{{$t('winSmall')}}</button>
                     <button @click="resizeWindow(800, 450)">{{$t('winMed')}}</button>
                     <button @click="resizeWindow(1280, 720)">{{$t('winLarge')}}</button>
                 </div>
             </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="createNewWindow()" v-bind:title="$t('window')">
-                <img src="static/controls/ic_open_in_new_white_48px.svg" />
-                <span>{{$t('window')}}</span>
+            <div v-else v-bind:key="item.id" class="ui item" tabindex="-1" @mousedown.stop @click="(item.click) ? item.click($event) : null">
+                <img v-if="item.icon" :src="item.icon" class="icon" />
+                <span>{{item.label}}</span>
             </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('notifications')" v-bind:title="$t('notifications')">
-                <img src="static/controls/ic_new_releases_white_48px.svg" />
-                <span>{{$t('notifications')}}</span>
-            </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('donate')" v-bind:title="$t('donate')">
-                <img src="static/controls/ic_monetization_on_white_48px.svg" />
-                <span>{{$t('donate')}}</span>
-            </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('settings')" v-bind:title="$t('settings')">
-                <img src="static/controls/ic_settings_white_48px.svg" />
-                <span>{{$t('settings')}}</span>
-            </div>
-            <div class="ui item" tabindex="-1" @mousedown.stop @click="$router.replace('about')" v-bind:title="$t('about')">
-                <img src="static/controls/ic_info_white_48px.svg" />
-                <span>{{$t('about')}}</span>
-            </div>
-        </div>
+        </template>
     </div>
 </template>
+
 <i18n>
 {
     "en": {
@@ -65,17 +37,25 @@
 </i18n>
 <script>
     import Volume from './Controls/Volume'
-    import AudioPan from './Controls/AudioPan'
-    import Speed from './Controls/Speed'
     import Utils from '@/mixins/Utils'
-
     const { PlayerEvents } = require('./Player/PlayerEvents')
 
     export default {
         name: 'app-menu',
         mixins: [ Utils ],
-        components: { Volume, AudioPan, Speed },
+        components: { Volume },
+        props: {
+            menuItems: {
+                type: Array
+            }
+        },
+        data () {
+            return {
+                items: null
+            }
+        },
         mounted () {
+            this.items = this.menuItems || []
             this.preventDraggables()
             this.$extendedInput.selectEl()
         },
@@ -89,15 +69,9 @@
 
 <style scoped>
     .menu {
-        background: #1b1f22;
-        flex-direction: column;
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 15em;
-        border-left: 0.05em solid #1d1d1d;
+        min-width: 12em;
         padding: 0.5em 0 0.5em 0;
+        background: #1b1f22;
         overflow: auto;
     }
 
@@ -111,12 +85,22 @@
         border-bottom:  0.05em solid #24292e;
     }
 
-    .menu > .item > :first-child {
+    .menu > .item:last-child {
+        border-bottom: none;
+    }
+
+    .menu > .item > .icon {
         display: flex;
         flex-grow: 0;
         width: 1.75em;
         height: 1.25em;
         align-items: center;
+    }
+
+    .menu > .item > span {
+        flex-grow: 1;
+        text-align: center;
+        color: #eee;
     }
 
     .menu > .item > :nth-child(2) {

@@ -4,6 +4,9 @@ import axios from 'axios'
 import Plugins from '../mixins/Plugins'
 import Utils from '../mixins/Utils'
 
+import moment from 'moment'
+import 'moment-timezone'
+
 const { PlayerEvents } = require('../components/Player/PlayerEvents')
 
 const BBUS = new Vue({
@@ -52,7 +55,21 @@ const BBUS = new Vue({
         },
         play (item) {
             this.item = item
+            // set defaults if not found
+            if (!item.src.defaults) {
+                // use today (Los Angeles today)
+                var bbt = moment().tz('America/Los_Angeles')
+                item.src.defaults = {
+                    month: bbt.format('MM'),
+                    day: bbt.format('DD'),
+                    year: bbt.format('YY'),
+                    angle: 5
+                }
+            }
+
+            // default angle
             if (!this.angle) this.angle = (item.src.defaults) ? item.src.defaults.angle : 5
+
             if (item.src.useCBSMedia) {
                 // get media data from CBS
                 if (!item.src.defaults) {
@@ -64,12 +81,6 @@ const BBUS = new Vue({
                 }
             } else {
                 // use custom media data
-                if (!item.src.defaults) {
-                    // use today if no date specified
-                    // TODO NEED MOMENT.JS
-                    let today = new Date()
-                    item.src.defaults = { month: ('0' + (today.getMonth() + 1)).slice(-2), day: ('0' + today.getDate()).slice(-2), year: today.getFullYear().toString().substr(-2) }
-                }
                 let dt = ('0' + item.src.defaults.month).slice(-2) + ('0' + item.src.defaults.day).slice(-2) + item.src.defaults.year.toString().substr(-2)
                 let m = { cp: item.src.data.cp }
                 for (var i = 1; i <= 6; i++) {
@@ -103,7 +114,6 @@ const BBUS = new Vue({
                         router.push('/auth?url=' + this.loginUrl + '&title=' + this.authTitle + '&desc=' + this.authDesc)
                     } else {
                         let token = response.data.token.replace('&hdcore=3.1', '')
-                        console.log('got token: ' + token)
                         this.playStream('http://' + media.cp + '.' + this.cdn + '/i/' + streamPath + '/master.m3u8?hdnea=' + token)
                     }
                 }
@@ -123,6 +133,7 @@ const BBUS = new Vue({
         switchAngle (angle) {
             this.angle = angle
             this.play(this.item)
+            PlayerEvents.$emit('anglechange', angle)
         }
     }
 })

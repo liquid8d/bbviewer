@@ -1,7 +1,8 @@
 <template>
-    <div id="app" @mouseleave="hideControls">
+    <div id="app" @mouseleave="leaveHide">
         <div v-if="$store.state.isElectron" ref="titlebar" class="titlebar">
             <span>{{$t('title')}}</span>
+            <img src="static/controls/ic_flip_to_front_white_48px.svg" @click.stop="setWindowOnTop()" />
             <img src="static/controls/ic_remove_white_48px.svg" @click.stop="minimizeWindow()" />
             <img src="static/controls/ic_zoom_out_map_white_48px.svg" @click.stop="maximizeWindow()" />
             <img src="static/controls/ic_clear_white_48px.svg" @click.stop="closeWindow()" />
@@ -40,7 +41,8 @@ export default {
     router,
     data () {
         return {
-            hideEnable: true,
+            hideLeave: true,
+            hideDelay: true,
             hideTimeout: 4000
         }
     },
@@ -52,7 +54,7 @@ export default {
             }
         })
         this.setDraggable(document.querySelector('#app'))
-        if (this.hideEnable) {
+        if (this.hideDelay || this.hideLeave) {
             this.$el.addEventListener('mousemove', this.showControls, false)
             this.$extendedInput.Keyboard.$on('key', this.showControls)
             this.$extendedInput.Gamepad.$on('key', this.showControls)
@@ -65,18 +67,22 @@ export default {
         this.$extendedInput.Gamepad.$off('key', this.showControls)
     },
     methods: {
+        leaveHide () {
+            if (this.hideLeave) this.hideControls()
+        },
         hideControls () {
-            if (this.hideEnable) {
-                if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
-                if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
-                PlayerEvents.$emit('showMenu', false)
-            }
+            if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
+            if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
+            PlayerEvents.$emit('showMenu', false)
+            if (this.hideDelay) clearTimeout(hideTimer)
         },
         showControls () {
-            clearTimeout(hideTimer)
-            hideTimer = setTimeout(e => this.hideControls(), this.hideTimeout)
             if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'flex'
             if (document.querySelector('.controls')) document.querySelector('.controls').style.display = ''
+            if (this.hideDelay) {
+                clearTimeout(hideTimer)
+                hideTimer = setTimeout(e => this.hideControls(), this.hideTimeout)
+            }
         }
     }
 }

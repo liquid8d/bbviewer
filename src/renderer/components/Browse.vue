@@ -50,6 +50,7 @@
     // content Plugins
     require('@/plugins/AllAccess')
     require('@/plugins/AdultSwim')
+    require('@/plugins/BBCAN')
     require('@/plugins/BBUS')
     require('@/plugins/Livestream')
     require('@/plugins/UtopiaNL')

@@ -25,7 +25,7 @@ const BBUS = new Vue({
             authDesc: 'This content requires a subscription. Login into your account, then try accessing the content again',
             cdn: 'akamaihd.net',
             item: null,
-            angle: null,
+            angle: 5,
             delayedSeek: null
         }
     },
@@ -38,18 +38,37 @@ const BBUS = new Vue({
         PlayerEvents.$on('switchAngle', this.switchAngle)
         PlayerEvents.$on('requestBookmarks', this.requestBookmarks)
         PlayerEvents.$on('loadBookmark', this.loadBookmark)
+        PlayerEvents.$on('delayedseek', this.processDelayedSeek)
     },
     beforeDestroy () {
         PlayerEvents.$off('stop', this.stop)
         PlayerEvents.$off('switchAngle', this.switchAngle)
         PlayerEvents.$off('requestBookmarks', this.requestBookmarks)
         PlayerEvents.$off('loadBookmark', this.loadBookmark)
+        PlayerEvents.$off('delayedseek', this.processDelayedSeek)
     },
     methods: {
+        processDelayedSeek (event) {
+            if (this.delayedSeek) {
+                console.log('processing delayed seek: ' + this.delayedSeek)
+                PlayerEvents.$emit('seekTo', this.delayedSeek)
+                this.delayedSeek = null
+            }
+        },
         loadBookmark (bookmark) {
             // TODO seek if on same date and cam, if different request new token, then seek
             // TODO determine play date based on timestamp
-            this.item.src.defaults = { month: bookmark.event_day.split('/')[0], day: bookmark.event_day.split('/')[1], year: bookmark.event_day.split('/')[2].substr(-2), seek: 0, angle: bookmark.channel }
+            let bbt = moment(bookmark.liveDate * 1000).tz('America/Los_Angeles')
+            let midnight = bbt.clone().startOf('day')
+            let seek = bbt.unix() - midnight.unix()
+            console.log('load bookmark for ' + bbt.format('MMDDYYYY') + ' seek: ' + seek)
+            this.item.src.defaults = {
+                month: bbt.format('MM'),
+                day: bbt.format('DD'),
+                year: bbt.format('YY'),
+                seek: seek,
+                angle: parseInt(bookmark.channel)
+            }
             this.play(this.item)
             router.replace('/')
         },
@@ -68,15 +87,17 @@ const BBUS = new Vue({
             }
 
             // default angle
-            if (!this.angle) this.angle = (item.src.defaults) ? item.src.defaults.angle : 5
+            this.angle = (item.src.defaults && item.src.defaults.angle) ? item.src.defaults.angle : 5
+            PlayerEvents.$emit('anglechange', this.angle)
+
+            // default seek
+            this.delayedSeek = (item.src.defaults && item.src.defaults.seek) ? item.src.defaults.seek : 0
 
             if (item.src.useCBSMedia) {
                 // get media data from CBS
                 if (!item.src.defaults) {
                     this.getMedia('?d=0')
-                    this.delayedSeek = 0
                 } else {
-                    if (!this.delayedSeek) this.delayedSeek = item.src.defaults.seek
                     this.getMedia('?year=' + item.src.defaults.year + '&month=' + ('0' + item.src.defaults.month).slice(-2) + '&day=' + ('0' + item.src.defaults.day).slice(-2))
                 }
             } else {

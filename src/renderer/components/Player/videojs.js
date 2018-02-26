@@ -211,6 +211,7 @@ export default {
                 console.dir(this.tech)
                 AudioPan.init(this.tech.el())
             } else if (event.type === 'loadedmetadata') {
+                PlayerEvents.$emit('delayedseek')
                 if (this.tech && this.tech.hls) {
                     console.log('HLS tech')
                     this.streamInfo.isLiveStream = !this.tech.hls.playlists.media().endList
@@ -237,6 +238,20 @@ export default {
                 if (this.isPlayingLive() !== this.streamInfo.isPlayingLive) {
                     PlayerEvents.$emit((this.isPlayingLive) ? 'live' : 'notlive')
                     this.streamInfo.isPlayingLive = this.isPlayingLive()
+                }
+                // show some debug info
+                if (document.getElementById('debug')) {
+                    document.getElementById('debug').innerHTML = `
+                    <p>url: ` + this.streamInfo.url + `</p>
+                    <p>currentTime: ` + this.streamInfo.currentTime + `</p>
+                    <p>duration: ` + this.streamInfo.duration + `</p>
+                    <p>currentHHMMSS: ` + this.streamInfo.currentHHMMSS + `</p>
+                    <p>durationHHMMSS: ` + this.streamInfo.durationHHMMSS + `</p>
+                    <p>position: ` + this.streamInfo.position + `</p>
+                    <p>isLiveStream: ` + this.streamInfo.isLiveStream + `</p>
+                    <p>isPlayingLive: ` + this.streamInfo.isPlayingLive + `</p>
+                    <p>qualities: ` + this.streamInfo.qualities.length + `</p>
+                    `
                 }
             } else if (event.type === 'volumechange') {
                 this.streamInfo.volume = this.player.volume()

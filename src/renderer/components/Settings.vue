@@ -7,6 +7,7 @@
         </div>
         <div v-if="environment() === 'development'" class="container stretch">
             <h2>Tests</h2>
+            <button @click="toggleDebug">Toggle Debug</button>
             <button @click="sendNotice()">Notice</button>
             <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="static/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
             <button @click="playerRedirect('aspectRatio', 'fit')">FIT</button>
@@ -75,6 +76,11 @@
                         console.error('could not send notification')
                     }
                 })
+            },
+            toggleDebug () {
+                if (document.getElementById('debug')) {
+                    document.getElementById('debug').style.display = (document.getElementById('debug').style.display !== 'block') ? 'block' : 'none'
+                }
             }
         }
     }

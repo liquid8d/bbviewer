@@ -12,6 +12,7 @@
             <backdrop style="z-index: 0;"></backdrop>
             <player ref="player"></player>
             <router-view style="z-index: 2;"></router-view>
+            <div id="debug">Debug</div>
         </div>
     </div>
 </template>
@@ -124,6 +125,19 @@ html, body {
 }
 ::-webkit-scrollbar-corner { background: rgba(0,0,0,0); }
 
+#debug {
+    display: none;
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    right: 1em;
+    font-size: 0.75em;
+    overflow: hidden;
+    background: rgba(10,10,10,0.8);
+    padding: 1em;
+    word-wrap: break-word;
+}
+
 #app {
     display: flex;
     flex-direction: column;
@@ -169,12 +183,19 @@ html, body {
 
 .page > .container {
     flex-direction: column;
+    flex-shrink: 0;
+    flex-grow: 0;
     padding: 0.5em;
+    height: auto;
 }
 
 .page > .container.stretch {
     flex-grow: 1;
     overflow: auto;
+}
+
+.page > .container.shrink {
+    flex-shrink: 1;
 }
 
 /* Window title bar when using Electron */

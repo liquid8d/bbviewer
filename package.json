@@ -1,7 +1,7 @@
 {
   "name": "bbviewer",
   "version": "6.0.0",
-  "author": "liquid8d",
+  "author": "liquid8d <liquid8d@gmail.com>",
   "description": "A video viewing application intended for Big Brother Live Feeders",
   "license": "GPL-2.0",
   "main": "./dist/electron/main.js",
@@ -52,7 +52,8 @@
       "icon": "build/icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons",
+      "target": "deb"
     }
   },
   "dependencies": {

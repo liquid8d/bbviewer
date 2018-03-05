@@ -1,8 +1,25 @@
-# bbviewer
+# BBViewer
 
 > A video viewing application intended for Big Brother Live Feeders
 
-#### Build Setup
+## Prerequisites
+
+### Windows Developers
+```
+# Install Windows build tools from an admin shell:
+npm install --global --production windows-build-tools
+
+# Install Bonjour SDK for Windows:
+https://download.developer.apple.com/Developer_Tools/bonjour_sdk_for_windows_v3.0/bonjoursdksetup.exe
+```
+
+### Linux Developers
+```
+# Install avahi dns lib
+sudo apt-get install libavahi-compat-libdnssd-dev
+```
+
+## Build Setup
 
 ``` bash
 # install dependencies
@@ -16,7 +33,6 @@ npm run build
 
 # run unit & end-to-end tests
 npm test
-
 
 # lint all JS/Vue component files in `src/`
 npm run lint

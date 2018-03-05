@@ -16,7 +16,7 @@
             <input ref="filterText" @keydown="allowUpDown" @keyup="filter" type="text" style="border:none;width: 100%;padding:0.5em;" />
         </div>
         <!-- Bookmarks List -->
-        <div v-if="filtered.length > 0" class="container list">
+        <div v-if="filtered.length > 0" class="container stretch">
             <div v-for="b in filtered" @keydown="allowLeftRight" :key="b.id">
                 <div class="ui bookmark" tabindex="-1" @click="load(b)">
                     <div v-if="b.icon" class="icon" :style="'background-image: url(\'' + b.icon + '\')'"></div>

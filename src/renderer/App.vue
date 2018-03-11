@@ -1,5 +1,5 @@
 <template>
-    <div id="app" @mouseleave="leaveHide">
+    <div id="app" @mouseleave="onMouseLeave">
         <div v-if="$store.state.isElectron" ref="titlebar" class="titlebar">
             <span>{{$t('title')}}</span>
             <img src="static/controls/ic_flip_to_front_white_48px.svg" @click.stop="setWindowOnTop()" />
@@ -12,6 +12,7 @@
             <backdrop style="z-index: 0;"></backdrop>
             <player ref="player"></player>
             <router-view style="z-index: 2;"></router-view>
+            <notification v-if="this.activeNotice" ref="notice" class="notice" v-bind="this.activeNotice"></notification>
             <div id="debug">Debug</div>
         </div>
     </div>
@@ -28,6 +29,7 @@
 <script>
 import Utils from './mixins/Utils'
 import Backdrop from './components/Backdrop'
+import Notification from './components/Notifications/Notification'
 import Player from './components/Player/Player'
 import router from './router'
 
@@ -38,10 +40,11 @@ var hideTimer
 export default {
     name: 'bbviewer',
     mixins: [ Utils ],
-    components: { Backdrop, Player, PlayerEvents },
+    components: { Backdrop, Player, PlayerEvents, Notification },
     router,
     data () {
         return {
+            activeNotice: null,
             hideLeave: true,
             hideDelay: true,
             hideTimeout: 4000
@@ -55,35 +58,49 @@ export default {
             }
         })
         this.setDraggable(document.querySelector('#app'))
-        if (this.hideDelay || this.hideLeave) {
-            this.$el.addEventListener('mousemove', this.showControls, false)
-            this.$extendedInput.Keyboard.$on('key', this.showControls)
-            this.$extendedInput.Gamepad.$on('key', this.showControls)
-        }
+
+        PlayerEvents.$on('showNotice', this.showNotice)
+        PlayerEvents.$on('clearNotice', this.clearNotice)
+
+        this.$el.addEventListener('mousemove', this.showControls, false)
+        this.$extendedInput.Keyboard.$on('key', this.showControls)
+        this.$extendedInput.Gamepad.$on('key', this.showControls)
         this.showControls()
     },
     beforeDestroy () {
         this.$el.removeEventListener('mousemove', this.showControls)
         this.$extendedInput.Keyboard.$off('key', this.showControls)
         this.$extendedInput.Gamepad.$off('key', this.showControls)
+
+        PlayerEvents.$off('notice', this.showNotice)
+        PlayerEvents.$off('notice', this.clearNotice)
     },
     methods: {
-        leaveHide () {
-            if (this.hideLeave) this.hideControls()
+        onMouseLeave () {
+            if (this.hideLeave) {
+                if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
+                if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
+                PlayerEvents.$emit('showMenu', false)
+            }
         },
-        hideControls () {
-            if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
-            if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
-            PlayerEvents.$emit('showMenu', false)
-            if (this.hideDelay) clearTimeout(hideTimer)
+        onDelay () {
+            if (this.hideDelay) {
+                if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
+                if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
+                PlayerEvents.$emit('showMenu', false)
+            }
+        },
+        showNotice (data) {
+            this.activeNotice = data
+        },
+        clearNotice () {
+            this.activeNotice = null
         },
         showControls () {
             if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'flex'
             if (document.querySelector('.controls')) document.querySelector('.controls').style.display = ''
-            if (this.hideDelay) {
-                clearTimeout(hideTimer)
-                hideTimer = setTimeout(e => this.hideControls(), this.hideTimeout)
-            }
+            clearTimeout(hideTimer)
+            hideTimer = setTimeout(e => this.onDelay(), this.hideTimeout)
         }
     }
 }
@@ -162,6 +179,7 @@ html, body {
 .app-container {
     position: relative;
     height: 100%;
+    overflow: hidden;
 }
 
 /* Base page css */
@@ -171,14 +189,19 @@ html, body {
     flex-shrink: 0;
     flex-grow: 1;
     position: absolute;
-    width: 100%;
-    height: 100%;
-    min-width: 100%;
-    min-height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
 }
 
 .page.overlay {
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.page.cover {
+    background-color: #111;
 }
 
 .page > .container {
@@ -186,16 +209,12 @@ html, body {
     flex-shrink: 0;
     flex-grow: 0;
     padding: 0.5em;
-    height: auto;
-}
-
-.page > .container.stretch {
-    flex-grow: 1;
     overflow: auto;
 }
 
-.page > .container.shrink {
+.page > .container.stretch {
     flex-shrink: 1;
+    flex-grow: 1;
 }
 
 /* Window title bar when using Electron */
@@ -229,6 +248,41 @@ html, body {
     margin: 0 0.3em 0 0.3em;
     pointer-events: all;
     cursor: pointer;
+}
+
+.notice {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 10em;
+    max-width: 33%;
+    z-index: 2;
+}
+.notice .options {
+    display:flex;
+    justify-content: center;
+}
+
+.pills {
+    display: inline;
+    padding: 0.5em;
+}
+
+.pills > button {
+    float: left;
+    border-radius: 0;
+    min-width: 2.5em;
+    margin: 0;
+}
+
+.pills > button:first-child {
+    border-radius: 0.5em 0 0 0.5em;
+    padding-left: 0.5em;
+}
+
+.pills > button:last-child {
+    border-radius: 0 0.5em 0.5em 0;
 }
 
 h1, h2, h3 {
@@ -293,25 +347,4 @@ button.icon > img {
     height: 1.5em;
 }
 
-
-.pills {
-    display: inline;
-    padding: 0.5em;
-}
-
-.pills > button {
-    float: left;
-    border-radius: 0;
-    min-width: 2.5em;
-    margin: 0;
-}
-
-.pills > button:first-child {
-    border-radius: 0.5em 0 0 0.5em;
-    padding-left: 0.5em;
-}
-
-.pills > button:last-child {
-    border-radius: 0 0.5em 0.5em 0;
-}
 </style>

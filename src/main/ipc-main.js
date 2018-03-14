@@ -53,7 +53,7 @@ ipcMain.on('window.ontop', (event, arg) => {
 // set window title
 ipcMain.on('window.title', (event, arg) => {
     let focused = BrowserWindow.getFocusedWindow()
-    focused.setTitle(arg.title)
+    if (focused) focused.setTitle(arg.title)
 })
 
 ipcMain.on('window.minimize', (event, arg) => {

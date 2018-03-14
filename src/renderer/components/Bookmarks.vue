@@ -12,7 +12,7 @@
                 </template>
             </bar>
         </div>
-        <div class="container">
+        <div class="container" v-if="filtered.length > 0">
             <input ref="filterText" @keydown="allowUpDown" @keyup="filter" type="text" style="border:none;width: 100%;padding:0.5em;" />
         </div>
         <!-- Bookmarks List -->
@@ -21,7 +21,7 @@
                 <div class="ui bookmark" tabindex="-1" @click="load(b)">
                     <div v-if="b.icon" class="icon" :style="'background-image: url(\'' + b.icon + '\')'"></div>
                     <header>{{b.event_title}}</header>
-                    <p>{{b.event_day}} {{b.event_time}} - {{$t('cam')}} {{b.channel}}</p>
+                    <p v-if="b.event_day && b.event_time && b.channel">{{b.event_day}} {{b.event_time}} - {{$t('cam')}} {{b.channel}}</p>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
         "back": "Back",
         "cam": "Cam ",
         "close": "Close",
-        "desc": "Some video streams support bookmarked events. Come back here when you start a stream to see if there are any!",
+        "desc": "No bookmarks available. Some video streams provide bookmarked events which you can access here.",
         "refresh": "Force Refresh",
         "title": "Bookmarks",
         "watch": "Watch"
@@ -52,10 +52,7 @@
 
 <script>
     import Bar from './Bar.vue'
-    import { clearInterval, setTimeout } from 'timers'
     const { PlayerEvents } = require('./Player/PlayerEvents')
-    
-    var updateTimer
 
     export default {
         data () {
@@ -70,8 +67,7 @@
                 },
                 filtered: [],
                 enabled: true,
-                lastUpdate: 0,
-                updateFrequency: 10000
+                lastUpdate: 0
             }
         },
         components: { Bar, PlayerEvents },
@@ -117,13 +113,11 @@
                 PlayerEvents.$emit('loadBookmark', bookmark)
             },
             requestBookmarks (forced) {
-                if (forced || this.lastUpdate - Date.now() <= this.frequency) {
+                if (forced || Date.now() - this.lastUpdate >= this.frequency) {
                     this.lastUpdate = Date.now()
                     console.log('request bookmarks: ' + this.lastUpdate)
                     PlayerEvents.$emit('requestBookmarks')
                 }
-                clearInterval(updateTimer)
-                updateTimer = setTimeout(e => this.requestBookmarks(true), this.updateFrequency)
             },
             provideBookmarks (bookmarks) {
                 if (bookmarks) {

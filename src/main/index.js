@@ -2,6 +2,7 @@
 
 import { app, BrowserWindow, ipcMain } from 'electron'
 require('./ipc-main')
+require('./flash-support')
 
 /**
  * Set `__static` path to static files in production

@@ -7,8 +7,10 @@ import store from './store'
 import i18n from './i18n'
 
 import ExtendedInput from './plugins/VueExtendedInput'
+import chromecast from './plugins/Chromecast'
 
 Vue.use(ExtendedInput)
+Vue.use(chromecast)
 
 // check environments
 store.state.environment = process.env.NODE_ENV

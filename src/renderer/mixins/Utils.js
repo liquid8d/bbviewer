@@ -12,6 +12,12 @@ const Utils = {
         }
     },
     methods: {
+        getPlugins () {
+            return this.$store.state.plugins
+        },
+        getPlugin (id) {
+            return this.$store.state.plugins[id]
+        },
         open (link) {
             // #if process.env.BUILD_TARGET === 'web'
             window.open(link, '', 'toolbar=no, location=no, width=800, height=360')

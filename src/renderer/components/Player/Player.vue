@@ -8,6 +8,11 @@
     import videojs from './videojs'
     export default {
         name: 'player',
+        data () {
+            return {
+                handler: null
+            }
+        },
         mixins: [ videojs ]
     }
 </script>

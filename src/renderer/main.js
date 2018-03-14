@@ -7,19 +7,26 @@ import store from './store'
 import i18n from './i18n'
 
 import ExtendedInput from './plugins/VueExtendedInput'
+
 Vue.use(ExtendedInput)
 
 // check environments
 store.state.environment = process.env.NODE_ENV
 if (!process.env.IS_WEB) {
     Vue.use(require('vue-electron'))
-    store.state.isElectron = true
+    store.commit('isElectron', true)
 } else {
-    store.state.isElectron = false
+    store.commit('isElectron', false)
 }
+store.commit('lastRun')
 
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
+
+const globals = {
+    player: null
+}
+Vue.globals = Vue.prototype.$globals = globals
 
 /* eslint-disable no-new */
 new Vue({

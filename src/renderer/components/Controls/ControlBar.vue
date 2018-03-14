@@ -1,8 +1,9 @@
 <template>
     <div class="controls">
-        <div class="bar">
+        <div class="bar alt-bar">
             <div ref="videoText" class="video-text"></div>
             <div class="section">
+                <button class="icon" @mousedown.stop @click="screenshot()" v-bind:title="$t('screenshot')"><img src="static/controls/ic_camera_alt_white_48px.svg" /></button>
                 <button class="icon" @click="$router.replace('bookmarks')" v-bind:title="$t('bookmarks')"><img src="static/controls/ic_bookmark_white_48px.svg" /></button>
                 <button class="icon" @click="$router.replace('flashbacks')" v-bind:title="$t('flashbacks')"><img src="static/controls/ic_history_white_48px.svg" /></button>
             </div>
@@ -29,6 +30,7 @@
         "flashbacks": "Flashbacks",
         "pan": "Audio Pan",
         "playbackRate": "Playback Speed",
+        "screenshot": "Screenshot",
         "quality": "Quality"
     }
 }
@@ -56,17 +58,21 @@
             }
         },
         mounted () {
-            PlayerEvents.$on('streamInfo', this.updateInfo)
             PlayerEvents.$on('anglechange', this.anglechange)
             PlayerEvents.$on('audiopanchange', this.audiopanchange)
             PlayerEvents.$on('playbackratechange', this.playbackratechange)
+            PlayerEvents.$on('stop', this.stop)
+            PlayerEvents.$on('update', this.onUpdate)
+            PlayerEvents.$on('videotext', this.onVideoText)
             this.$refs.seekbar.$on('endslide', this.onSeekValue)
         },
         beforeDestroy () {
-            PlayerEvents.$off('streamInfo', this.updateInfo)
             PlayerEvents.$off('anglechange', this.anglechange)
             PlayerEvents.$off('audiopanchange', this.audiopanchange)
             PlayerEvents.$off('playbackratechange', this.playbackratechange)
+            PlayerEvents.$off('update', this.onUpdate)
+            PlayerEvents.$off('videotext', this.onVideoText)
+            PlayerEvents.$off('stop', this.stop)
             this.$refs.seekbar.$off('endslide', this.onSeekValue)
         },
         methods: {
@@ -82,21 +88,30 @@
             playbackratechange (rate) {
                 this.playbackRate = rate
             },
-            updateInfo (data) {
-                if (this.$refs.videoText) this.$refs.videoText.innerHTML = data.currentHHMMSS + ' : ' + data.durationHHMMSS
+            onUpdate (data) {
                 if (!this.$refs.seekbar.isSliding) this.$refs.seekbar.setValue(data.position)
+            },
+            onVideoText (text) {
+                if (this.$refs.videoText) this.$refs.videoText.innerHTML = text
             },
             onSeekValue (e) {
                 var val = e.offsetX
                 var max = parseInt(window.getComputedStyle(e.currentTarget).width)
                 var requested = val / max
                 PlayerEvents.$emit('seekNormalize', requested)
+            },
+            stop () {
+                if (this.$refs.videoText) this.$refs.videoText.innerHTML = ''
             }
         }
     }
 </script>
 
 <style scoped>
+.hidden {
+    visibility:hidden;
+}
+
 .bar {
     display: flex;
     flex-direction: row;

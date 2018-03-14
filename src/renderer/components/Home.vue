@@ -33,8 +33,9 @@
         mixins: [ Utils ],
         data () {
             return {
+                menu: '',
                 anglesMenuItems: [
-                    { id: 1, label: 'No Angles' }
+                    { id: 1, label: '' }
                 ],
                 audioMenuItems: [
                     { id: 1, label: this.$i18n.t('left'), click () { PlayerEvents.$emit('setAudioPan', 'left') } },
@@ -64,93 +65,69 @@
         },
         mounted () {
             this.preventDraggables()
-            PlayerEvents.$on('showMenu', this.showMenu)
-            PlayerEvents.$on('toggleAngle', this.showAngles)
-            PlayerEvents.$on('toggleAudioPan', this.showAudioPan)
-            PlayerEvents.$on('toggleSpeed', this.showSpeed)
-            PlayerEvents.$on('toggleQuality', this.showQuality)
-            PlayerEvents.$on('toggleMenu', this.showMenu)
-            PlayerEvents.$on('provideAngles', this.onAngles)
+            PlayerEvents.$on('toggleAngle', this.toggleAngle)
+            PlayerEvents.$on('toggleAudioPan', this.toggleAudioPan)
+            PlayerEvents.$on('toggleSpeed', this.toggleSpeed)
+            PlayerEvents.$on('toggleQuality', this.toggleQuality)
+            PlayerEvents.$on('toggleMenu', this.toggleDefault)
+            PlayerEvents.$on('provideAngles', this.onProvideAngles)
         },
         beforeDestory () {
-            PlayerEvents.$off('showMenu', this.showMenu)
             PlayerEvents.$off('toggleAngle', this.showAngles)
-            PlayerEvents.$off('toggleAudioPan', this.showAudioPan)
-            PlayerEvents.$off('toggleSpeed', this.showSpeed)
-            PlayerEvents.$off('toggleQuality', this.showQuality)
-            PlayerEvents.$off('toggleMenu', this.showMenu)
-            PlayerEvents.$off('provideAngles', this.onAngles)
+            PlayerEvents.$off('toggleAudioPan', this.toggleAudioPan)
+            PlayerEvents.$off('toggleSpeed', this.toggleSpeed)
+            PlayerEvents.$off('toggleQuality', this.toggleQuality)
+            PlayerEvents.$off('toggleMenu', this.toggleMenu)
+            PlayerEvents.$off('provideAngles', this.onProvideAngles)
             this.hideMenu()
         },
         methods: {
-            onAngles (angles) {
-                this.anglesMenuItems = []
-                for (var i = 0; i < angles.length; i++) {
-                    let angle = {
-                        id: i + 1,
-                        label: angles[i].label,
-                        click: function () {
-                            PlayerEvents.$emit('switchAngle', this.id)
-                        }
-                    }
-                    this.anglesMenuItems.push(angle)
-                }
+            onProvideAngles (angles) {
+                this.anglesMenuItems = angles
             },
-            hideMenu () {
-                if (this.$refs.appMenu) this.$refs.appMenu.$el.style.display = 'none'
-            },
-            showAngles () {
+            toggleMenu (which) {
                 if (this.$refs.appMenu) {
-                    if (this.$refs.appMenu.items === this.anglesMenuItems && this.$refs.appMenu.$el.style.display !== 'none') {
-                        this.$refs.appMenu.$el.style.display = 'none'
+                    if (this.$refs.appMenu.$el.style.display === 'block') {
+                        if (which === undefined || this.currentMenu === which) this.$refs.appMenu.$el.style.display = 'none'
                     } else {
                         this.$refs.appMenu.$el.style.display = 'block'
+                    }
+                    if (this.currentMenu !== which) {
+                        this.currentMenu = which
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            },
+            toggleAngle () {
+                if (this.toggleMenu('angles')) {
+                    if (this.$refs.appMenu) {
                         this.$refs.appMenu.items = this.anglesMenuItems
+                        PlayerEvents.$emit('requestAngles')
                     }
                 }
             },
-            showAudioPan () {
-                if (this.$refs.appMenu) {
-                    if (this.$refs.appMenu.items === this.audioMenuItems && this.$refs.appMenu.$el.style.display !== 'none') {
-                        this.$refs.appMenu.$el.style.display = 'none'
-                    } else {
-                        this.$refs.appMenu.$el.style.display = 'block'
-                        this.$refs.appMenu.items = this.audioMenuItems
-                    }
+            toggleAudioPan () {
+                if (this.toggleMenu('audiopan')) {
+                    if (this.$refs.appMenu) this.$refs.appMenu.items = this.audioMenuItems
                 }
             },
-            showSpeed () {
-                if (this.$refs.appMenu) {
-                    if (this.$refs.appMenu.items === this.playbackMenuItems && this.$refs.appMenu.$el.style.display !== 'none') {
-                        this.$refs.appMenu.$el.style.display = 'none'
-                    } else {
-                        this.$refs.appMenu.$el.style.display = 'block'
-                        this.$refs.appMenu.items = this.playbackMenuItems
-                    }
-                }
-            },
-            showQuality () {
-                if (this.$refs.appMenu) {
-                    if (this.$refs.appMenu.items === this.qualityMenuItems && this.$refs.appMenu.$el.style.display !== 'none') {
-                        this.$refs.appMenu.$el.style.display = 'none'
-                    } else {
-                        this.$refs.appMenu.$el.style.display = 'block'
-                        this.$refs.appMenu.items = this.qualityMenuItems
-                    }
-                }
-            },
-            showMenu (toggle) {
-                if (toggle === false) {
-                    this.hideMenu()
-                    return
-                }
-                if (this.$refs.appMenu) {
-                    if (this.$refs.appMenu.items === this.defaultMenuItems && this.$refs.appMenu.$el.style.display !== 'none') {
-                        this.$refs.appMenu.$el.style.display = 'none'
-                    } else {
-                        this.$refs.appMenu.$el.style.display = 'block'
+            toggleDefault () {
+                if (this.toggleMenu('main')) {
+                    if (this.$refs.appMenu) {
                         this.$refs.appMenu.items = this.defaultMenuItems
                     }
+                }
+            },
+            toggleSpeed () {
+                if (this.toggleMenu('speed')) {
+                    if (this.$refs.appMenu) this.$refs.appMenu.items = this.playbackMenuItems
+                }
+            },
+            toggleQuality () {
+                if (this.toggleMenu('quality')) {
+                    if (this.$refs.appMenu) this.$refs.appMenu.items = this.qualityMenuItems
                 }
             }
         }
@@ -161,10 +138,10 @@
     .app-menu {
         display: none;
         position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 6.4em;
+        right: 1em;
+        bottom: 7.25em;
         min-width: 8em;
+        max-height: 50%;
         border-left: 0.05em solid #1d1d1d;
     }
     .audioPan {

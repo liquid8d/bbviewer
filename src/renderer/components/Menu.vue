@@ -4,8 +4,6 @@
             <div v-if="item.content" v-bind:key="item.id" class="item">
                 <img v-if="item.icon" :src="item.icon" class="icon" />
                 <volume v-if="item.content === 'volume'"></volume>
-                <audio-pan v-if="item.content === 'audiopan'"></audio-pan>
-                <speed v-if="item.content === 'playbackrate'"></speed>
                 <div v-if="item.content === 'resize'" class="pills">
                     <button @click="resizeWindow(640, 360)">{{$t('winSmall')}}</button>
                     <button @click="resizeWindow(800, 450)">{{$t('winMed')}}</button>
@@ -69,7 +67,7 @@
 
 <style scoped>
     .menu {
-        min-width: 12em;
+        min-width: 8em;
         padding: 0.5em 0 0.5em 0;
         background: #1b1f22;
         overflow: auto;

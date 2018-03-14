@@ -10,8 +10,25 @@ export default new Vuex.Store({
         locale: 'en',
         version: '6.0.0',
         build: 'stable',
-        plugins: {}
+        lastRun: 0,
+        isElectron: false,
+        plugins: {},
+        notifications: []
     },
     modules,
+    mutations: {
+        addPlugin (state, plugin) {
+            if (state.plugins[plugin.id]) {
+                console.warn('plugin ' + this.id + ' already exists, overwriting!')
+            }
+            state.plugins[plugin.id] = plugin
+        },
+        isElectron (state, val) {
+            state.isElectron = val
+        },
+        lastRun (state) {
+            state.lastRun = Date.now()
+        }
+    },
     strict: process.env.NODE_ENV !== 'production'
 })

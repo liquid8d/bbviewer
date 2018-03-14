@@ -8,14 +8,14 @@
         <template slot="center">
             <button class="icon" @mousedown.stop @click="playerRedirect('seek', -300)" v-bind:title="$t('seek')"><img src="static/controls/ic_skip_previous_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="playerRedirect('seek', -30)" v-bind:title="$t('seek')"><img src="static/controls/ic_chevron_left_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="playerRedirect('pause')" v-bind:title="$t('seek')"><img src="static/controls/ic_pause_white_48px.svg" /></button>
+            <button class="icon" @mousedown.stop @click="playerRedirect('pause')" v-bind:title="$t('pause')"><img ref="playImage" src="static/controls/ic_play_arrow_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="playerRedirect('seek', 30)" v-bind:title="$t('seek')"><img src="static/controls/ic_chevron_right_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="playerRedirect('seek', 300)" v-bind:title="$t('seek')"><img src="static/controls/ic_skip_next_white_48px.svg" /></button>
+            <button ref="liveButton" class="disabled" @mousedown.stop @click="playerRedirect('goLive')" v-bind:title="$t('live')">{{$t('live')}}</button>
         </template>
         <template slot="right">
-            <button ref="liveButton" class="disabled" @mousedown.stop @click="playerRedirect('goLive')" v-bind:title="$t('live')">{{$t('live')}}</button>
-            <button class="icon" @mousedown.stop @click="screenshot()" v-bind:title="$t('screenshot')"><img src="static/controls/ic_camera_alt_white_48px.svg" /></button>
-            <button class="icon" @mousedown.stop @click="showMenu" v-bind:title="$t('more')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
+            <button class="icon" @mousedown.stop @click="toggleAlt" v-bind:title="$t('alt-bar')"><img src="static/controls/ic_more_horiz_white_48px.svg" /></button>
+            <button class="icon" @mousedown.stop @click="showMenu" v-bind:title="$t('settings')"><img src="static/controls/ic_settings_white_48px.svg" /></button>
             <button class="icon" @mousedown.stop @click="fullscreen()" v-bind:title="$t('fullscreen')"><img src="static/controls/ic_fullscreen_white_48px.svg" /></button>
         </template>
     </bar>
@@ -24,13 +24,14 @@
 <i18n>
 {
     "en": {
+        "alt-bar": "Toggle Other Controls",
         "browse": "Browse",
         "fullscreen": "Fullscreen",
         "live": "LIVE",
-        "more": "More",
         "mute": "Mute",
-        "screenshot": "Screenshot",
+        "pause": "Play/Pause",
         "seek": "Seek",
+        "settings": "Settings",
         "stop": "Stop"
     }
 }
@@ -48,7 +49,8 @@
             this.preventDraggables()
             this.$extendedInput.selectEl(this.$refs.browse)
             PlayerEvents.$on('muted', this.muted)
-            PlayerEvents.$on('play', this.play)
+            PlayerEvents.$on('onPlay', this.onPlay)
+            PlayerEvents.$on('onPause', this.onPause)
             PlayerEvents.$on('live', this.live)
             PlayerEvents.$on('notLive', this.notLive)
         },
@@ -71,11 +73,23 @@
             notLive () {
                 if (this.$refs.liveButton) this.$refs.liveButton.style.className = 'notlive'
             },
-            play () {
+            onPlay () {
                 if (this.$refs.liveButton) this.$refs.liveButton.style.className = 'notlive'
+                if (this.$refs.playImage) this.$refs.playImage.src = 'static/controls/ic_pause_white_48px.svg'
+            },
+            onPause () {
+                if (this.$refs.playImage) this.$refs.playImage.src = 'static/controls/ic_play_arrow_white_48px.svg'
             },
             showMenu () {
                 PlayerEvents.$emit('toggleMenu')
+            },
+            toggleAlt () {
+                let alt = document.querySelector('.alt-bar')
+                if (alt && alt.style.display === 'none') {
+                    alt.style.display = ''
+                } else {
+                    alt.style.display = 'none'
+                }
             }
         }
     }

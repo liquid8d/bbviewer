@@ -4,6 +4,7 @@
  */
 
 import AudioPan from './AudioPan'
+import Utils from '../../mixins/Utils'
 
 require('videojs-contrib-media-sources')
 require('videojs-contrib-hls.js')
@@ -20,7 +21,7 @@ const { PlayerEvents } = require('./PlayerEvents')
 export default {
     data () {
         return {
-            player: null,
+            handler: null,
             settings: {
                 liveWindow: 40
             },
@@ -39,9 +40,10 @@ export default {
             }
         }
     },
+    mixins: [ Utils ],
     mounted () {
-        if (this.player == null) {
-            this.player = window.videojs(this.$el.querySelector('video'), {
+        if (this.$globals.player == null) {
+            this.$globals.player = window.videojs(this.$el.querySelector('video'), {
                 techOrder: ['html5', 'youtube', 'vimeo', 'flash'],
                 html5: {
                     hlsjsConfig: {
@@ -62,12 +64,12 @@ export default {
             // var vjsEvents = [
             //     'volumechange', 'timeupdate'
             //     // 'progress', 'abort', 'suspend', 'emptied', 'stalled',
-            //     // 'loadedmetadata', 'loadeddata', , 'ratechange',
+            //     // 'loadeddata', , 'ratechange',
             //     // 'resize', 'texttrackchange',
             //     // tech events
             //     // 'loadstart', 'waiting', 'canplay', 'canplaythrough', 'playing',
             //     // 'ended', 'seeking', 'seeked', 'play', 'firstplay', 'pause',
-            //     // 'durationchange', 'fullscreenchange', 'error', 'loadedmetadata',
+            //     // 'durationchange', 'fullscreenchange', 'error'
             //     // 'posterchange', 'textdata',
             //     // tech listeners
             //     // 'mousedown', 'touchstart', 'touchmove', 'touchend', 'tap'
@@ -77,14 +79,16 @@ export default {
             // ]
 
             // expose vjs events
-            var vjsEvents = [ 'loadstart', 'loadedmetadata', 'timeupdate', 'volumechange' ]
+            var vjsEvents = [ 'play', 'pause', 'loadstart', 'loadedmetadata', 'timeupdate', 'volumechange' ]
             for (var i = 0; i < vjsEvents.length; i++) {
-                this.player.on(vjsEvents[i], this.redirectPlayerEvent)
+                this.$globals.player.on(vjsEvents[i], this.redirectPlayerEvent)
             }
 
             // handle incoming events
+            PlayerEvents.$on('setHandler', this.setHandler)
             PlayerEvents.$on('aspectRatio', this.aspectRatio)
             PlayerEvents.$on('play', this.play)
+            PlayerEvents.$on('playItem', this.playItem)
             PlayerEvents.$on('pause', this.pause)
             PlayerEvents.$on('stop', this.stop)
             PlayerEvents.$on('seek', this.seek)
@@ -97,12 +101,18 @@ export default {
             PlayerEvents.$on('toggleMute', this.toggleMute)
             PlayerEvents.$on('setAudioPan', this.setAudioPan)
             PlayerEvents.$on('pip', this.togglePip)
+            PlayerEvents.$on('requestAngles', this.onRequestAngles)
+            PlayerEvents.$on('requestBookmarks', this.requestBookmarks)
+            PlayerEvents.$on('switchAngle', this.switchAngle)
+            PlayerEvents.$on('loadBookmark', this.loadBookmark)
 
             console.log('video component ready.')
         }
     },
     beforeDestroy () {
+        PlayerEvents.$off('setHandler', this.setHandler)
         PlayerEvents.$off('aspectRatio', this.aspectRatio)
+        PlayerEvents.$off('playItem', this.playItem)
         PlayerEvents.$off('play', this.play)
         PlayerEvents.$off('pause', this.pause)
         PlayerEvents.$off('stop', this.stop)
@@ -116,28 +126,60 @@ export default {
         PlayerEvents.$off('toggleMute', this.toggleMute)
         PlayerEvents.$off('setAudioPan', this.setAudioPan)
         PlayerEvents.$off('pip', this.togglePip)
+        PlayerEvents.$off('requestBookmarks', this.requestBookmarks)
+        PlayerEvents.$off('loadBookmark', this.loadBookmark)
+        // angle events
+        PlayerEvents.$off('requestAngles', this.onRequestAngles)
+        PlayerEvents.$off('switchAngle', this.switchAngle)
     },
     methods: {
+        setHandler (handler) {
+            console.log('set player handler to: ' + handler.id)
+            this.handler = handler
+        },
+        loadBookmark (bookmark) {
+            if (this.handler && this.handler.loadBookmark) this.handler.loadBookmark(bookmark)
+        },
+        requestBookmarks () {
+            if (this.handler && this.handler.onRequestBookmarks) this.handler.onRequestBookmarks()
+        },
+        onRequestAngles () {
+            console.log('request angles')
+            if (this.handler && this.handler.onRequestAngles) this.handler.onRequestAngles()
+        },
+        getSelectedAngle () {
+            if (this.handler && this.handler.getSelectedAngle) {
+                return this.handler.getSelectedAngle()
+            } else {
+                return 1
+            }
+        },
+        switchAngle (angle) {
+            if (this.handler && this.handler.switchAngle) {
+                this.handler.switchAngle(angle)
+                PlayerEvents.$emit('anglechange', angle)
+            }
+        },
         aspectRatio (ratio) {
             // keep (fit), crop (fill), off (stretch)
-            this.player.aspectRatio(ratio)
+            this.$globals.player.aspectRatio(ratio)
         },
         currentTime () {
-            return this.player.currentTime()
+            return this.$globals.player.currentTime()
         },
         duration () {
-            var time = this.player.seekable()
+            var time = this.$globals.player.seekable()
             if (time && time.length) {
                 // set updated duration
-                this.player.duration(this.player.seekable().end(0))
+                this.$globals.player.duration(this.$globals.player.seekable().end(0))
             }
-            return this.player.duration()
+            return this.$globals.player.duration()
         },
         dvrWindow () {
-            if (this.player.seekable() && this.player.seekable().length) {
-                return this.player.seekable().end(0) - this.player.seekable().start(0)
+            if (this.$globals.player.seekable() && this.$globals.player.seekable().length) {
+                return this.$globals.player.seekable().end(0) - this.$globals.player.seekable().start(0)
             }
-            return this.player.duration()
+            return this.$globals.player.duration()
         },
         isPlayingLive () {
             return this.duration() - this.currentTime() < this.settings.liveWindow
@@ -146,72 +188,98 @@ export default {
             return this.streamInfo.isLiveStream || false
         },
         goLive () {
-            if (this.player.seekable()) {
-                this.player.currentTime(this.player.seekable().end(0))
+            if (this.$globals.player.seekable()) {
+                this.$globals.player.currentTime(this.$globals.player.seekable().end(0))
             } else {
-                this.seekTo(this.player.duration())
+                this.seekTo(this.$globals.player.duration())
             }
         },
         pause () {
             if (this.paused()) {
-                this.player.play()
+                this.$globals.player.play()
             } else {
-                this.player.pause()
-                this.$emit('pause')
+                this.$globals.player.pause()
             }
         },
         paused () {
-            return this.player.paused()
+            return this.$globals.player.paused()
         },
         playing () {
-            return this.player.playing
+            return this.$globals.player.playing
         },
         playbackRate (rate) {
-            this.player.playbackRate(rate)
+            this.$globals.player.playbackRate(rate)
             PlayerEvents.$emit('playbackratechange', rate)
         },
+        playItem (item) {
+            // load source handler, if provided
+            if (item.src instanceof Object) {
+                console.log('looking for handler: ' + item.src.handler)
+                let plugin = this.getPlugin(item.src.handler)
+                if (plugin) {
+                    if (this.$globals.player.currentSrc()) this.stop()
+                    this.setHandler(plugin)
+                    console.log('playing with handler: ' + this.handler.id)
+                    if (this.handler.init) this.handler.init()
+                    if (this.handler.play) this.handler.play(item.src); else if (item.src) this.play(item.src)
+                } else {
+                    console.error('plugin for requested handler does not exist')
+                }
+            } else {
+                // play source url
+                if (this.$globals.player.currentSrc()) this.stop()
+                this.setHandler(this.getPlugin('default'))
+                console.log('playing item src')
+                this.play(item.src)
+            }
+        },
         play (src) {
-            if (this.playing()) this.stop()
             if (src.indexOf('.m3u8') >= 0) {
                 // HLS
-                this.player.src({ src: src, type: 'application/x-mpegURL' })
+                this.$globals.player.src({ src: src, type: 'application/x-mpegURL', withCredentials: true })
             } else if (src.indexOf('.mp4') >= 0) {
                 // MP4
-                this.player.src({ src: src, type: 'video/mp4' })
+                this.$globals.player.src({ src: src, type: 'video/mp4' })
             } else if (src.indexOf('.webm') >= 0) {
-                this.player.src({ src: src, type: 'video/webm' })
+                this.$globals.player.src({ src: src, type: 'video/webm' })
             } else if (src.indexOf('.ism') >= 0) {
                 // MSS
-                this.player.src({ src: src, type: 'application/ttml+xml+mp4' })
+                this.$globals.player.src({ src: src, type: 'application/ttml+xml+mp4' })
             } else if (src.indexOf('.mpd') >= 0 || (src.indexOf('.ism') >= 0 && src.indexOf('format=mpd') >= 0)) {
                 // DASH
-                this.player.src({ src: src, type: 'application/dash+xml' })
+                this.$globals.player.src({ src: src, type: 'application/dash+xml' })
             } else if (src.indexOf('youtube.com') >= 0) {
                 // YOUTUBE
-                this.player.src({ src: src, type: 'video/youtube' })
+                this.$globals.player.src({ src: src, type: 'video/youtube' })
             } else if (src.indexOf('vimeo.com') >= 0) {
                 // VIMEO
-                this.player.src({ src: src, type: 'video/vimeo' })
+                this.$globals.player.src({ src: src, type: 'video/vimeo' })
             } else if (src.indexOf('rtmp://') >= 0) {
                 // RTMP
-                this.player.src({ src: src, type: 'rtmp/mp4' })
+                this.$globals.player.src({ src: src, type: 'rtmp/mp4' })
             } else if (src.indexOf('.f4m') >= 0) {
                 // HDS
-                this.player.src({ src: src, type: 'application/f4m' })
+                this.$globals.player.src({ src: src, type: 'application/f4m' })
             } else {
                 console.warn('unsupported video source')
             }
-            this.streamInfo.url = this.player.currentSrc() || ''
-            this.player.play()
+            this.streamInfo.url = this.$globals.player.currentSrc() || ''
+            this.$globals.player.play()
         },
         redirectPlayerEvent (event) {
-            if (event.type === 'loadstart') {
+            if (event.type === 'play') {
+                PlayerEvents.$emit('onPlay')
+            } else if (event.type === 'pause') {
+                PlayerEvents.$emit('onPause')
+            } else if (event.type === 'loadstart') {
                 // hook player tech for audio pan
-                this.tech = this.player.tech({ IWillNotUseThisInPlugins: true })
-                console.dir(this.tech)
+                this.tech = this.$globals.player.tech({ IWillNotUseThisInPlugins: true })
+                // console.dir(this.tech)
                 AudioPan.init(this.tech.el())
             } else if (event.type === 'loadedmetadata') {
-                PlayerEvents.$emit('delayedseek')
+                console.log('loaded metadata')
+                console.dir(this.handler)
+                if (this.handler && this.handler.onLoadedMetadata) this.handler.onLoadedMetadata()
                 if (this.tech && this.tech.hls) {
                     console.log('HLS tech')
                     this.streamInfo.isLiveStream = !this.tech.hls.playlists.media().endList
@@ -254,9 +322,10 @@ export default {
                     `
                 }
             } else if (event.type === 'volumechange') {
-                this.streamInfo.volume = this.player.volume()
+                this.streamInfo.volume = this.$globals.player.volume()
             }
-            PlayerEvents.$emit('streamInfo', this.streamInfo)
+            PlayerEvents.$emit('update', this.streamInfo)
+            if (this.handler) this.handler.onUpdate(this.streamInfo)
         },
         convertBytes (b) {
             if (b < 1024) return b + 'B'
@@ -264,26 +333,26 @@ export default {
             if (b < 1024000000) return Math.round(b / 1024000) + 'MB'
         },
         remainingTime () {
-            return this.player.remainingTime()
+            return this.$globals.player.remainingTime()
         },
         seek (secs) {
-            if (this.player.duration() <= 0) return
-            if (this.player.currentTime() + secs < this.player.duration()) {
-                this.player.currentTime(this.player.currentTime() + secs)
+            if (this.$globals.player.duration() <= 0) return
+            if (this.$globals.player.currentTime() + secs < this.$globals.player.duration()) {
+                this.$globals.player.currentTime(this.$globals.player.currentTime() + secs)
                 this.$emit('seek')
             }
         },
         seekTo (secs) {
-            if (secs < this.player.duration()) {
-                this.player.currentTime(secs)
+            if (secs < this.$globals.player.duration()) {
+                this.$globals.player.currentTime(secs)
                 this.$emit('seekTo')
             }
         },
         seekNormalize (normalize) {
-            this.seekTo(this.player.duration() * normalize)
+            this.seekTo(this.$globals.player.duration() * normalize)
         },
         seeking () {
-            return this.player.seeking()
+            return this.$globals.player.seeking()
         },
         setAudioPan (which) {
             AudioPan.pan(which)
@@ -292,19 +361,11 @@ export default {
             console.log('no quality index implementation yet')
         },
         setMuted (muted) {
-            this.player.muted(muted)
+            this.$globals.player.muted(muted)
             PlayerEvents.$emit('muted', muted)
         },
-        toggleMute () {
-            this.setMuted(!this.player.muted())
-        },
-        volume (val) {
-            if (val) this.player.volume(val)
-            return this.player.volume()
-        },
         stop () {
-            if (!this.paused()) this.player.pause()
-            this.player.reset()
+            this.$globals.player.reset()
             this.streamInfo = {
                 volume: 0,
                 currentTime: 0,
@@ -316,6 +377,17 @@ export default {
                 isLiveStream: false,
                 isPlayingLive: false
             }
+            if (this.handler) this.handler.onStop()
+            this.handler = null
+            PlayerEvents.$emit('videotext', '')
+            this.setWindowTitle('BBViewer')
+        },
+        toggleMute () {
+            this.setMuted(!this.$globals.player.muted())
+        },
+        volume (val) {
+            if (val) this.$globals.player.volume(val)
+            return this.$globals.player.volume()
         },
         toHHMMSS (sec) {
             var secs = parseInt(sec, 10)

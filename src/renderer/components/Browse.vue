@@ -12,16 +12,16 @@
                 <!-- Item Folders -->
                 <div v-if="item.folder" class="card folder ui" tabIndex="-1" @click.stop="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
                     <img v-if="item.poster" v-bind:src="item.poster" />
-                    <div v-if="item.title || item.desc" class="content">
-                        <h1>{{item.title}}</h1>
+                    <div v-if="item.label || item.desc" class="content">
+                        <h1>{{item.label}}</h1>
                         <p>{{item.desc}}</p>
                     </div>
                 </div>
                 <!-- Single Items -->
-                <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.stop="play(item)" :key="item.id" v-for="item in filter" >
+                <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.stop="playItem(item)" :key="item.id" v-for="item in filter" >
                     <img v-bind:src="item.poster" />
-                    <div v-if="item.title || item.desc" class="content">
-                        <h1>{{item.title}}</h1>
+                    <div v-if="item.label || item.desc" class="content">
+                        <h1>{{item.label}}</h1>
                         <p>{{item.desc}}</p>
                     </div>
                 </div>
@@ -45,14 +45,16 @@
 
 <script>
     import axios from 'axios'
-    import Plugins from '../mixins/Plugins'
+    import Utils from '../mixins/Utils'
 
     // content Plugins
+    require('@/plugins/DefaultHandler')
     require('@/plugins/AllAccess')
     require('@/plugins/AdultSwim')
     require('@/plugins/BBCAN')
     require('@/plugins/BBUS')
     require('@/plugins/Livestream')
+    require('@/plugins/ThePlatform')
     require('@/plugins/UtopiaNL')
 
     const { PlayerEvents } = require('./Player/PlayerEvents')
@@ -60,10 +62,11 @@
     export default {
         name: 'browse',
         components: { PlayerEvents },
-        mixins: [ Plugins ],
+        mixins: [ Utils ],
         data () {
             return {
                 fetchRemote: true,
+                remoteUrls: [],
                 lastFetch: 0,
                 updateFreq: 300,
                 all: [],
@@ -73,6 +76,11 @@
             }
         },
         mounted () {
+            if (this.$store.state.isElectron) {
+                this.remoteUrls.push('http://goodiesfor.me/bbviewer/content/app')
+            } else {
+                this.remoteUrls.push('http://goodiesfor.me/bbviewer/content/web')
+            }
             this.path = this.$route.query.path
             // do fetch
             if (this.items.length === 0 || Date.now() > this.lastFetch + this.updateFreq) {
@@ -85,47 +93,60 @@
         methods: {
             fetch () {
                 this.items = []
-                let plugins = this.getPlugins()
-                // add all plugin media to this.items
+                let plugins = this.$store.state.plugins
+
+                // add any provided media or src to the items
                 Object.keys(plugins).forEach(id => {
+                    if (plugins[id].media) {
+                        // insert handler for plugin media
+                        plugins[id].media.forEach((key) => {
+                            if (!plugins[id].media[key].handler) plugins[id].media[key].handler = id
+                        })
+                    } else if (plugins[id].src) {
+                        // insert handler for plugin src
+                        if (!plugins[id].src.handler) plugins[id].src.handler = id
+                    }
                     if (plugins[id].media || plugins[id].src) this.addItem(plugins[id])
                 })
 
                 // fetch remote items
                 if (this.fetchRemote) {
-                    axios.get('http://goodiesfor.me/bbviewer/content')
-                        .then(response => {
-                            Object.keys(response.data.media).forEach(m => {
-                                this.addItem(response.data.media[m], '')
+                    this.remoteUrls.forEach((url) => {
+                        console.log(url)
+                        axios.get(url)
+                            .then(response => {
+                                Object.keys(response.data.media).forEach(m => {
+                                    this.addItem(response.data.media[m], '')
+                                })
+                                this.filterItems({ path: this.path })
                             })
-                            this.filterItems({ path: this.path })
-                        })
-                        .catch((err) => {
-                            console.log('error getting content: ' + err)
-                        })
+                            .catch((err) => {
+                                console.log('error getting content: ' + err)
+                            })
+                    })
                 }
             },
             addItem (media, path) {
                 media = {
                     id: media.id,
-                    title: media.title,
+                    label: media.label,
                     desc: media.desc,
                     poster: media.poster,
                     media: media.media,
                     path: path || '',
-                    handler: media.handler,
                     src: media.src
                 }
                 if (!media.media) delete media.media
                 if (!media.src) delete media.src
-                if (!media.handler) delete media.handler
                 if (media.media) {
                     media.folder = true
-                    Object.keys(media.media).forEach(m => this.addItem(media.media[m], media.path + '/' + media.id))
+                    Object.keys(media.media).forEach((m) => {
+                        if (media.media[m].src instanceof Object && !media.media[m].src.handler && media.media[m].handler) media.media[m].src.handler = media.media[m].handler
+                        this.addItem(media.media[m], media.path + '/' + media.id)
+                    })
                     delete media.media
                 } else {
                     media.folder = false
-                    // media.path = media.path.substr(0, media.path.length - media.id.length - 1)
                 }
                 this.items.push(media)
             },
@@ -137,17 +158,9 @@
                     // this.filter = this.items.filter(val => (val.folder && val.path === '') || (!val.folder && val.src && val.path === ''))
                 }
             },
-            play (item) {
-                if (item.handler) {
-                    console.log('playing with handler: ' + item.handler)
-                    this.getPlugin(item.handler).play(item)
-                    this.$router.push('/')
-                } else if (item.src) {
-                    this.playerRedirect('play', item.src)
-                    this.$router.push('/')
-                } else {
-                    console.warn('couldn\'t play unrecognized item')
-                }
+            playItem (item) {
+                this.playerRedirect('playItem', item)
+                this.$router.push('/')
             },
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)

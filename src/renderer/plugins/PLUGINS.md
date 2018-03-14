@@ -1,4 +1,6 @@
-A plugin is a Vue component that is extended with the Plugins mixin, and contains specific methods to handle playing media content:
+A *VideoPlugin* is a class containing an array of media objects and/or methods for playing media content. Media objects don't have to be included and can be retrieved from elsewhere, as long as the media object specifies a 'handler' property with the plugin id.
+
+Example VideoPlugin
 
 ```javascript
 import VideoPlugin from '../mixins/Plugins'

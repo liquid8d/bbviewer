@@ -66,6 +66,14 @@ export default {
         this.$extendedInput.Keyboard.$on('key', this.showControls)
         this.$extendedInput.Gamepad.$on('key', this.showControls)
         this.showControls()
+
+        // WEB DEV NOTICE
+        if (!this.$store.state.isElectron) {
+            this.showNotice({
+                title: '<font color="red">WIP Version</font>',
+                desc: 'This is a development test version of a future BBViewer revamp. Not all media or features are available in the browser version.'
+            })
+        }
     },
     beforeDestroy () {
         this.$el.removeEventListener('mousemove', this.showControls)

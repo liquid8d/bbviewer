@@ -1,12 +1,13 @@
 <template>
-    <div class="page overlay">
-        <div class="container">
-            <h1>{{ $t('settings') }}</h1>
-            <button @click="$router.push('auth')" class="icon" @mousedown.stop v-bind:title="$t('auth')"><img src="static/controls/ic_vpn_key_white_48px.svg" /><span>{{$t('auth')}}</span></button>
-            <button class="icon" @mousedown.stop @click="restartApp()" v-bind:title="$t('restart')"><img src="static/controls/ic_refresh_white_48px.svg" /><span>{{$t('restart')}}</span></button>
+    <div class="page cover">
+        <div class="container stretch">
+            <dynamic-form :form="form"></dynamic-form>
         </div>
+        <!--
         <div v-if="environment() === 'development'" class="container stretch">
             <h2>Tests</h2>
+            <button @click="$router.push('auth')" class="icon" @mousedown.stop v-bind:title="$t('auth')"><img src="static/controls/ic_vpn_key_white_48px.svg" /><span>{{$t('auth')}}</span></button>
+            <button class="icon" @mousedown.stop @click="restartApp()" v-bind:title="$t('restart')"><img src="static/controls/ic_refresh_white_48px.svg" /><span>{{$t('restart')}}</span></button>
             <button @click="toggleDebug">Toggle Debug</button>
             <button @click="sendNotice()">Notice</button>
             <button class="icon" @mousedown.stop v-bind:title="$t('account')"><img src="static/controls/ic_account_circle_white_48px.svg" /><span>{{$t('account')}}</span></button>
@@ -21,6 +22,12 @@
             </p>
             <button @click="dir = chooseFolder()">Choose Folder</button>
             <button @click="setWindowTitle('Test')">Set Window Title</button>
+        </div>
+        -->
+        <div v-if="showFlash" class="container pad">
+            <header>Flash test</header>
+            <webview v-if="$store.isElectron" class="flash" src="http://wwwimages.adobe.com/www.adobe.com/swf/software/flash/about/flash_about_793x170.swf" plugins></webview>
+            <object v-if="!$store.isElectron" class="flash" type="application/x-shockwave-flash" data="http://wwwimages.adobe.com/www.adobe.com/swf/software/flash/about/flash_about_793x170.swf" style="width: auto; height: auto;"> <param name="movie" value="http://wwwimages.adobe.com/www.adobe.com/swf/software/flash/about/flash_about_793x170.swf" /><param name="wmode" value="transparent" /><param name="FlashVars" value="" /><param name="quality" value="high" /><param name="menu" value="false" /></object>
         </div>
         <div class="container">
             <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
@@ -41,6 +48,8 @@
 </i18n>
 
 <script>
+    import { mapState } from 'vuex'
+    import DynamicForm from './DynamicForm'
     import Utils from '@/mixins/Utils'
     import Player from './Player/Player'
     import { PlayerEvents } from './Player/PlayerEvents'
@@ -50,15 +59,70 @@
         mixins: [ Utils ],
         data () {
             return {
-                dir: ''
+                dir: '',
+                showFlash: false,
+                form: {
+                    getValue: this.getValue,
+                    setValue: this.setValue,
+                    items: [
+                        {
+                            id: 'display',
+                            label: 'Display',
+                            items: [
+                                {
+                                    id: 'hideLeave',
+                                    type: 'checkbox',
+                                    label: 'Hide Leave',
+                                    desc: 'Hide window title and controls when the mouse leaves the window'
+                                },
+                                {
+                                    id: 'hideDelay',
+                                    type: 'checkbox',
+                                    label: 'Hide Delay',
+                                    desc: 'Hide window title and controls after a set delay'
+                                },
+                                {
+                                    id: 'hideTimeout',
+                                    type: 'number',
+                                    label: 'Hide Timeout',
+                                    desc: 'The delay, in milliseconds, before window title and controls are hidden if hide delay is enabled'
+                                }
+                            ]
+                        }
+                    ]
+                }
             }
         },
-        components: { Player, PlayerEvents },
+        computed: mapState([
+            'hideLeave',
+            'hideDelay',
+            'hideTimeout'
+        ]),
+        components: { 'dynamic-form': DynamicForm, Player, PlayerEvents },
         mounted () {
             this.preventDraggables()
             this.$extendedInput.selectEl()
         },
         methods: {
+            getValue (e) {
+                console.log(e.target.name + ': ' + this[e.target.name])
+                return this[e.target.name]
+            },
+            setValue (e) {
+                if (e.target) {
+                    switch (e.target.type) {
+                    case 'checkbox':
+                        this.$store.commit(e.target.name, e.target.checked)
+                        break
+                    case 'number':
+                        this.$store.commit(e.target.name, e.target.value)
+                        break
+                    case 'select':
+                        this.$store.commit(e.target.name, e.target.selectedOptions[0].value)
+                        break
+                    }
+                }
+            },
             playerRedirect (event, arg) {
                 if (arg) PlayerEvents.$emit(event, arg); else PlayerEvents.$emit(event)
             },
@@ -86,8 +150,14 @@
     }
 </script>
 
-<style>
+<style scoped>
     a {
         margin-right: 1em;
+    }
+    .pad {
+        margin: 0 2em 0 2em;
+    }
+    .flash {
+        max-height: 3em;
     }
 </style>

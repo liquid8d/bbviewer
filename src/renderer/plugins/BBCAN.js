@@ -75,7 +75,6 @@ const BBCAN = new VideoPlugin({
         }
     },
     play (src) {
-        console.log('handler play')
         this.config.item = src
         let config = { headers: {'Cache-Control': 'no-cache'} }
         if (!this.config.flashbacks) {
@@ -101,7 +100,6 @@ const BBCAN = new VideoPlugin({
         let url = this.config.url.replace('[account]', account).replace('[event]', event).replace('[broadcast]', broadcast).replace('[token]', token)
         console.log(url)
         PlayerEvents.$emit('play', url)
-        PlayerEvents.$emit('supportsBookmarks')
     }
 })
 

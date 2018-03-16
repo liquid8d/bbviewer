@@ -56,7 +56,8 @@
         },
         beforeDestroy () {
             PlayerEvents.$off('muted', this.muted)
-            PlayerEvents.$off('play', this.play)
+            PlayerEvents.$off('onPlay', this.onPlay)
+            PlayerEvents.$off('onPause', this.onPause)
             PlayerEvents.$off('live', this.live)
             PlayerEvents.$off('notLive', this.notLive)
         },

@@ -1,8 +1,6 @@
 'use strict'
 
 import { app, BrowserWindow, ipcMain } from 'electron'
-require('./ipc-main')
-require('./flash-support')
 
 /**
  * Set `__static` path to static files in production
@@ -11,6 +9,9 @@ require('./flash-support')
 if (process.env.NODE_ENV !== 'development') {
     global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
+
+require('./ipc-main')
+require('./flash-support')
 
 function createWindow () {
     ipcMain.emit('window.new')

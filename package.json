@@ -1,5 +1,6 @@
 {
   "name": "bbviewer",
+  "productName": "BBViewer",
   "version": "6.0.0",
   "author": "liquid8d <liquid8d@gmail.com>",
   "description": "A video viewing application intended for Big Brother Live Feeders",
@@ -22,7 +23,6 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "bbviewer",
     "appId": "me.goodiesfor.bbviewer",
     "directories": {
       "output": "build"
@@ -53,7 +53,8 @@
     },
     "linux": {
       "icon": "build/icons",
-      "target": "deb"
+      "target": "deb",
+      "category": "AudioVideo"
     }
   },
   "dependencies": {

@@ -62,7 +62,7 @@
                         return this.$store.state.bookmarks
                     },
                     setter (bookmarks) {
-                        this.$store.state.bookmarks = bookmarks
+                        this.$store.commit('bookmarks', bookmarks)
                     }
                 },
                 filtered: [],
@@ -79,11 +79,6 @@
             }
         },
         methods: {
-            computed: {
-                bookmarks () {
-                    return this.$store.state.bookmarks
-                }
-            },
             allowUpDown (e) {
                 if (this.$extendedInput.Keyboard.config.up.includes(e.which) ||
                 this.$extendedInput.Keyboard.config.down.includes(e.which) ||

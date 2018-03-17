@@ -10,7 +10,7 @@ class BasePlugin {
         } else {
             if (!data.created) data.created = this.created
             Object.assign(this, data)
-            store.commit('addPlugin', this)
+            store.commit('plugin', this)
             this.created()
         }
     }

@@ -13,21 +13,25 @@ export default new Vuex.Store({
         lastRun: 0,
         isElectron: false,
         plugins: {},
-        notifications: []
+        notifications: [],
+        bookmarks: []
     },
     modules,
     mutations: {
-        addPlugin (state, plugin) {
-            if (state.plugins[plugin.id]) {
-                console.warn('plugin ' + this.id + ' already exists, overwriting!')
-            }
-            state.plugins[plugin.id] = plugin
-        },
         isElectron (state, val) {
             state.isElectron = val
         },
         lastRun (state) {
             state.lastRun = Date.now()
+        },
+        bookmarks (state, val) {
+            state.bookmarks = val
+        },
+        plugin (state, plugin) {
+            if (state.plugins[plugin.id]) {
+                console.warn('plugin ' + this.id + ' already exists, overwriting!')
+            }
+            state.plugins[plugin.id] = plugin
         }
     },
     strict: process.env.NODE_ENV !== 'production'

@@ -2,9 +2,7 @@ import VideoPlugin from '../mixins/Plugins'
 import axios from 'axios'
 import router from '../router'
 
-import moment from 'moment'
-import 'moment-timezone'
-
+const moment = require('moment-timezone')
 const { PlayerEvents } = require('../components/Player/PlayerEvents')
 
 const BBUS = new VideoPlugin({
@@ -79,7 +77,6 @@ const BBUS = new VideoPlugin({
     },
     play (src) {
         console.log('BBUS play:')
-        console.dir(src)
         this.config.item = src
         // set defaults if not found
         if (!src.defaults) {

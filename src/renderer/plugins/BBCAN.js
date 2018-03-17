@@ -2,9 +2,7 @@ import VideoPlugin from '../mixins/Plugins'
 import axios from 'axios'
 import router from '../router'
 
-import moment from 'moment'
-import 'moment-timezone'
-
+const moment = require('moment-timezone')
 const { PlayerEvents } = require('../components/Player/PlayerEvents')
 
 const BBCAN = new VideoPlugin({
@@ -58,8 +56,6 @@ const BBCAN = new VideoPlugin({
                     let broadcast = this.config.flashbacks[key][i].bid
                     console.log('play ' + account + ',' + event + ',' + broadcast)
                     this.playStream(account, event, broadcast)
-                    // let temp = 'https://secure-playlist.livestream.com/streams/6388794_8036524_lsi1jy09uadbajvt66w_1/media/6388794_8036524_lsi1jy09uadbajvt66w_1@3628000p.m3u8'
-                    // TODO seek
                     break
                 }
             }
@@ -98,7 +94,6 @@ const BBCAN = new VideoPlugin({
     playStream (account, event, broadcast) {
         let token = '' // 'st=1490444575~exp=1490446375~acl=/i/6388794_7139268_lsimpfq3zwjsfg18cy9_1@408465/*~hmac=08b6cb46bbcbc05eae4eff754ebe34279b9c533ce057ad88e3f575c1aefce130'
         let url = this.config.url.replace('[account]', account).replace('[event]', event).replace('[broadcast]', broadcast).replace('[token]', token)
-        console.log(url)
         PlayerEvents.$emit('play', url)
     }
 })

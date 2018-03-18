@@ -16,10 +16,18 @@ case 'win32':
     }
     break
 case 'darwin':
-    pluginName = 'PepperFlashPlayer.plugin'
+    pluginName = '/pepper/PepperFlashPlayer.plugin'
     break
 case 'linux':
-    pluginName = 'libpepflashplayer-x64.so'
+case 'x64':
+    switch (process.arch) {
+    case 'x64':
+        pluginName = '/pepper/libpepflashplayer-x64.so'
+        break
+    default:
+        pluginName = '/pepper/libpepflashplayer.so'
+        break
+    }
     break
 }
 

@@ -20,7 +20,7 @@ const BBCAN = new VideoPlugin({
             { id: 4, label: 'Cam 4', desc: 'Cam 4', click: function () { PlayerEvents.$emit('switchAngle', 4) } }
         ],
         flashbacks: null,
-        url: 'https://api.new.livestream.com/accounts/[account]/events/[event]/broadcasts/[broadcast].secure.m3u8?dw=80'
+        url: 'https://player-api.new.livestream.com/accounts/[account]/events/[event]/broadcasts/[broadcast].secure.m3u8?dw=14400&hdnea=[auth]'
     },
     onUpdate (data) {
         // update video text and window title while playing
@@ -89,12 +89,28 @@ const BBCAN = new VideoPlugin({
         let account = id.substr(0, id.indexOf('_'))
         let event = id.substr(id.indexOf('_') + 1, id.indexOf('_', id.indexOf('_')))
         let broadcast = this.config.flashbacks['cam' + this.config.angle][0].bid
-        this.playStream(account, event, broadcast)
+        let path = this.config.flashbacks['cam' + this.config.angle][0].id + '@' + this.config.flashbacks['cam' + this.config.angle][0].sid
+        this.playStream(account, event, broadcast, path)
     },
-    playStream (account, event, broadcast) {
-        let token = '' // 'st=1490444575~exp=1490446375~acl=/i/6388794_7139268_lsimpfq3zwjsfg18cy9_1@408465/*~hmac=08b6cb46bbcbc05eae4eff754ebe34279b9c533ce057ad88e3f575c1aefce130'
-        let url = this.config.url.replace('[account]', account).replace('[event]', event).replace('[broadcast]', broadcast).replace('[token]', token)
+    playStream (account, event, broadcast, path) {
+        let current = Math.floor(Date.now() / 1000)
+        let expire = current + 1800
+        let auth = 'st=[current]~exp=[expire]~acl=/i/[path]/*~hmac=' + this.getToken()
+        auth = auth.replace('[current]', current).replace('[expire]', expire).replace('[path]', path)
+        let url = this.config.url.replace('[account]', account).replace('[event]', event).replace('[broadcast]', broadcast).replace('[auth]', auth)
         PlayerEvents.$emit('play', url)
+    },
+    randomIntInc (low, high) {
+        return Math.floor(Math.random() * (high - low + 1) + low)
+    },
+    getToken () {
+        var token = ''
+        for (var i = 0; i < 64; i++) {
+            var val = this.randomIntInc(0, 15)
+            if (val === 10) val = 'a'; else if (val === 11) val = 'b'; else if (val === 12) val = 'c'; else if (val === 13) val = 'd'; else if (val === 14) val = 'e'; else if (val === 15) val = 'f'
+            token += val
+        }
+        return token
     }
 })
 

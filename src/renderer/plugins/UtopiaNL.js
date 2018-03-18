@@ -1,8 +1,7 @@
 import VideoPlugin from '../mixins/Plugins'
-import moment from 'moment'
-import 'moment-timezone'
 
 const jsonp = require('jsonp')
+const moment = require('moment-timezone')
 const { PlayerEvents } = require('../components/Player/PlayerEvents')
 
 const UtopiaNLPlugin = new VideoPlugin({

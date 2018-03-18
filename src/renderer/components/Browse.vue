@@ -4,32 +4,59 @@
             <h1>Browse: {{path}}</h1>
         </div>
         <div class="container stretch">
-            <!-- Back poster -->
-            <div class="card ui" tabindex="-1" @click="routePrevious">
-                <h1 style="position: absolute; bottom: 0.2em;">Back</h1>
+            <div v-if="view === 'poster-view'" class="poster-view">
+                <!-- Back poster -->
+                <div class="card ui" tabindex="-1" @click="routePrevious">
+                    <h1 style="position: absolute; bottom: 0.2em;">Back</h1>
+                </div>
+                <template v-if="items">
+                    <!-- Item Folders -->
+                    <div v-if="item.folder" class="card folder ui" tabIndex="-1" @click.stop="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
+                        <img v-if="item.poster" v-bind:src="item.poster" />
+                        <div v-if="item.label || item.desc" class="content">
+                            <h1>{{item.label}}</h1>
+                            <p>{{item.desc}}</p>
+                        </div>
+                    </div>
+                    <!-- Single Items -->
+                    <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.stop="playItem(item)" :key="item.id" v-for="item in filter" >
+                        <img v-bind:src="item.poster" />
+                        <div v-if="item.label || item.desc" class="content">
+                            <h1>{{item.label}}</h1>
+                            <p>{{item.desc}}</p>
+                        </div>
+                    </div>
+                </template>
             </div>
-            <template v-if="items">
-                <!-- Item Folders -->
-                <div v-if="item.folder" class="card folder ui" tabIndex="-1" @click.stop="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
-                    <img v-if="item.poster" v-bind:src="item.poster" />
-                    <div v-if="item.label || item.desc" class="content">
-                        <h1>{{item.label}}</h1>
-                        <p>{{item.desc}}</p>
-                    </div>
+            <div v-else class="list-view">
+                <!-- Back poster -->
+                <div class="item ui" tabindex="-1" @click="routePrevious">
+                    <h1>Back</h1>
                 </div>
-                <!-- Single Items -->
-                <div v-if="!item.folder" class="card ui" tabIndex="-1" @click.stop="playItem(item)" :key="item.id" v-for="item in filter" >
-                    <img v-bind:src="item.poster" />
-                    <div v-if="item.label || item.desc" class="content">
-                        <h1>{{item.label}}</h1>
-                        <p>{{item.desc}}</p>
+                <template v-if="items">
+                    <!-- Item Folders -->
+                    <div v-if="item.folder" class="item folder ui" tabIndex="-1" @click.stop="routeTo(item.path + '/' + item.id)" :key="index" v-for="(item, index) in filter">
+                        <img v-if="item.poster" v-bind:src="item.poster" />
+                        <div v-if="item.label || item.desc" class="content">
+                            <h1>{{item.label}}</h1>
+                            <p>{{item.desc}}</p>
+                        </div>
                     </div>
-                </div>
-            </template>
+                    <!-- Single Items -->
+                    <div v-if="!item.folder" class="item ui" tabIndex="-1" @click.stop="playItem(item)" :key="item.id" v-for="item in filter" >
+                        <img v-bind:src="item.poster" />
+                        <div v-if="item.label || item.desc" class="content">
+                            <h1>{{item.label}}</h1>
+                            <p>{{item.desc}}</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
         </div>
         <div class="container">
             <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
             <button class="icon" @mousedown.stop @click="fetch()" v-bind:title="$t('refresh')"><img src="static/controls/ic_refresh_white_48px.svg" /><span>{{$t('refresh')}}</span></button>
+            <button class="icon" @mousedown.stop @click="toggleView()" v-bind:title="$t('view')"><img src="static/controls/ic_list_white_48px.svg" /><span>{{$t('view')}}</span></button>
         </div>
     </div>
 </template>
@@ -38,7 +65,8 @@
 {
     "en": {
         "back": "Back",
-        "refresh": "Force Refresh"
+        "refresh": "Force Refresh",
+        "view": "View"
     }
 }
 </i18n>
@@ -65,6 +93,7 @@
         mixins: [ Utils ],
         data () {
             return {
+                view: 'poster-view',
                 fetchRemote: true,
                 remoteUrls: [],
                 lastFetch: 0,
@@ -177,13 +206,59 @@
                 this.path = path
                 this.filterItems({ path: this.path })
                 this.$router.push('/browse?path=' + path)
+            },
+            toggleView () {
+                this.view = (this.view === 'poster-view') ? 'list-view' : 'poster-view'
             }
         }
     }
 </script>
 
 <style>
-    .card {
+    .list-view {
+        display: flex;
+        position: relative;
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        flex-grow: 0;
+    }
+
+    .list-view .item {
+        position: relative;
+        display: flex;
+        background-color: #111;
+        border: 2px solid #222;
+        box-sizing: border-box;
+        margin: 0.25em;
+        padding: 0.5em;
+        width: 100%;
+        height: 5.25em;
+        cursor:pointer;
+    }
+
+    .list-view .item > img {
+        width: 4em;
+        height: 4em;
+    }
+    
+    .list-view .item > .content {
+        margin-left: 0.5em;
+        padding: 0.25em;
+    }
+
+    .poster-view {
+        display: flex;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        flex-grow: 0;
+    }
+
+    .poster-view .card {
         position: relative;
         display: inline-flex;
         background-color: #111;
@@ -196,22 +271,22 @@
         cursor:pointer;
     }
 
-    .card.folder {
+    .poster-view .card.folder, .list-view .item.folder {
         background-color:rgb(55, 11, 80);
     }
     
-    .card:focus {
+    .poster-view .card:focus, .list-view .item:focus {
         border: 1px solid chartreuse;
     }
 
-    .card > img {
+    .poster-view .card > img {
         position: relative;
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .card > .content {
+    .poster-view .card > .content {
         position: absolute;
         bottom: 0;
         left: 0;
@@ -221,12 +296,12 @@
         background-color: rgba(10, 10, 10, 0.9);
     }
 
-    .card > .content > h1 {
+    .poster-view .card > .content > h1, .list-view .item > .content > h1 {
         color: #efefef;
         font-size: 0.75em;
     }
 
-    .card > .content > p {
+    .poster-view .card > .content > p, .list-view .item > .content > p {
         color: #888;
         font-size: 0.6em;
     }

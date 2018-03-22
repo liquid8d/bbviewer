@@ -50,7 +50,7 @@
                     { id: 5, label: '2.0', click () { PlayerEvents.$emit('playbackRate', 2) } }
                 ],
                 qualityMenuItems: [
-                    { id: 1, label: 'Auto' }
+                    { id: -1, label: 'Auto' }
                 ],
                 defaultMenuItems: [
                     { id: 'volume', icon: 'static/controls/ic_volume_up_white_48px.svg', label: 'Volume', content: 'volume' },
@@ -70,7 +70,8 @@
             PlayerEvents.$on('toggleSpeed', this.toggleSpeed)
             PlayerEvents.$on('toggleQuality', this.toggleQuality)
             PlayerEvents.$on('toggleMenu', this.toggleDefault)
-            PlayerEvents.$on('provideAngles', this.onProvideAngles)
+            PlayerEvents.$on('provideAngles', this.onAngles)
+            PlayerEvents.$on('provideLevels', this.onLevels)
         },
         beforeDestory () {
             PlayerEvents.$off('toggleAngle', this.showAngles)
@@ -78,12 +79,16 @@
             PlayerEvents.$off('toggleSpeed', this.toggleSpeed)
             PlayerEvents.$off('toggleQuality', this.toggleQuality)
             PlayerEvents.$off('toggleMenu', this.toggleMenu)
-            PlayerEvents.$off('provideAngles', this.onProvideAngles)
+            PlayerEvents.$off('provideAngles', this.onAngles)
+            PlayerEvents.$off('provideLevels', this.onLevels)
             this.hideMenu()
         },
         methods: {
-            onProvideAngles (angles) {
+            onAngles (angles) {
                 this.anglesMenuItems = angles
+            },
+            onLevels (list) {
+                this.qualityMenuItems = list
             },
             toggleMenu (which) {
                 if (this.$refs.appMenu) {

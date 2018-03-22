@@ -95,7 +95,7 @@ export default {
             PlayerEvents.$on('seekTo', this.seekTo)
             PlayerEvents.$on('seekNormalize', this.seekNormalize)
             PlayerEvents.$on('playbackRate', this.playbackRate)
-            PlayerEvents.$on('setQualityIndex', this.setQualityIndex)
+            PlayerEvents.$on('switchlevel', this.switchLevel)
             PlayerEvents.$on('goLive', this.goLive)
             PlayerEvents.$on('volume', this.volume)
             PlayerEvents.$on('toggleMute', this.toggleMute)
@@ -120,7 +120,7 @@ export default {
         PlayerEvents.$off('seekTo', this.seekTo)
         PlayerEvents.$off('seekNormalize', this.seekNormalize)
         PlayerEvents.$off('playbackRate', this.playbackRate)
-        PlayerEvents.$off('setQualityIndex', this.setQualityIndex)
+        PlayerEvents.$off('switchlevel', this.switchLevel)
         PlayerEvents.$off('goLive', this.goLive)
         PlayerEvents.$off('volume', this.volume)
         PlayerEvents.$off('toggleMute', this.toggleMute)
@@ -144,7 +144,6 @@ export default {
             if (this.handler && this.handler.onRequestBookmarks) this.handler.onRequestBookmarks()
         },
         onRequestAngles () {
-            console.log('request angles')
             if (this.handler && this.handler.onRequestAngles) this.handler.onRequestAngles()
         },
         getSelectedAngle () {
@@ -185,7 +184,7 @@ export default {
             return this.duration() - this.currentTime() < this.settings.liveWindow
         },
         isLiveStream () {
-            return this.streamInfo.isLiveStream || false
+            return this.streamInfo.isLiveStream
         },
         goLive () {
             if (this.$globals.player.seekable()) {
@@ -214,7 +213,6 @@ export default {
         playItem (item) {
             // load source handler, if provided
             if (item.src instanceof Object) {
-                console.log('looking for handler: ' + item.src.handler)
                 let plugin = this.getPlugin(item.src.handler)
                 if (plugin) {
                     if (this.$globals.player.currentSrc()) this.stop()
@@ -274,25 +272,41 @@ export default {
             } else if (event.type === 'loadstart') {
                 // hook player tech for audio pan
                 this.tech = this.$globals.player.tech({ IWillNotUseThisInPlugins: true })
-                // console.dir(this.tech)
+                // if (this.tech.sourceHandler_ && this.tech.sourceHandler_.hls) {
+                //     this.tech = this.tech.sourceHandler_.hls
+                // }
                 AudioPan.init(this.tech.el())
             } else if (event.type === 'loadedmetadata') {
                 console.log('loaded metadata')
-                console.dir(this.handler)
+                // console.dir(this.$globals.player.qualityLevels())
                 if (this.handler && this.handler.onLoadedMetadata) this.handler.onLoadedMetadata()
-                if (this.tech && this.tech.hls) {
-                    console.log('HLS tech')
-                    this.streamInfo.isLiveStream = !this.tech.hls.playlists.media().endList
-                    for (var i = 0; i < this.tech.hls.representations().length; i++) {
-                        this.streamInfo.qualities.unshift({
-                            id: this.streamInfo.qualities.length,
-                            uri: this.tech.hls.representations()[i].id,
-                            label: this.tech.hls.representations()[i].height + 'p (' + this.convertBytes(this.tech.hls.representations()[i].bandwidth) + ')',
-                            bandwidth: this.tech.hls.representations()[i].bandwidth,
-                            width: this.tech.hls.representations()[i].width,
-                            height: this.tech.hls.representations()[i].height
+
+                // find quality levels
+                if (this.tech.sourceHandler_ && this.tech.sourceHandler_.hls) {
+                    // console.dir(this.tech.sourceHandler_.hls)
+                    let qualities = []
+                    for (var i = 0; i < this.tech.sourceHandler_.hls.levelController.levels.length; i++) {
+                        let quality = this.tech.sourceHandler_.hls.levelController.levels[i]
+                        qualities.unshift({
+                            id: i,
+                            label: quality.width + 'x' + quality.height + ' (' + this.convertBytes(quality.bitrate) + ')',
+                            click: function () {
+                                PlayerEvents.$emit('switchlevel', this)
+                            }
                         })
                     }
+                    qualities.unshift({
+                        id: -1,
+                        label: 'Auto',
+                        click: function () {
+                            PlayerEvents.$emit('switchlevel', this)
+                        }
+                    })
+                    this.streamInfo.isLiveStream = this.tech.sourceHandler_.hls.liveSyncPosition
+                    this.streamInfo.currentLevel = (this.tech.sourceHandler_.hls.manualLevel === -1) ? 0 : this.tech.sourceHandler_.hls.currentLevel
+                    this.streamInfo.qualities = qualities
+                    PlayerEvents.$emit('provideLevels', this.streamInfo.qualities)
+                    this.switchLevel(this.getLevel())
                 } else {
                     console.log('unknown tech')
                     this.streamInfo.isLiveStream = this.isLiveStream()
@@ -357,8 +371,17 @@ export default {
         setAudioPan (which) {
             AudioPan.pan(which)
         },
-        setQualityIndex (idx) {
-            console.log('no quality index implementation yet')
+        getLevel () {
+            for (var i = 0; i < this.streamInfo.qualities.length; i++) {
+                if (this.streamInfo.qualities[i].id === this.streamInfo.currentLevel) return this.streamInfo.qualities[i]
+            }
+            return {}
+        },
+        switchLevel (item) {
+            if (this.tech.sourceHandler_ && this.tech.sourceHandler_.hls) {
+                PlayerEvents.$emit('levelchange', item)
+                this.tech.sourceHandler_.hls.levelController.manualLevel = item.id
+            }
         },
         setMuted (muted) {
             this.$globals.player.muted(muted)
@@ -379,6 +402,8 @@ export default {
             }
             if (this.handler) this.handler.onStop()
             this.handler = null
+            PlayerEvents.$emit('provideLevels', [])
+            PlayerEvents.$emit('levelchange', '')
             PlayerEvents.$emit('videotext', '')
             this.setWindowTitle('BBViewer')
         },

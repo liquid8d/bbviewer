@@ -61,6 +61,7 @@
             PlayerEvents.$on('anglechange', this.anglechange)
             PlayerEvents.$on('audiopanchange', this.audiopanchange)
             PlayerEvents.$on('playbackratechange', this.playbackratechange)
+            PlayerEvents.$on('levelchange', this.levelchange)
             PlayerEvents.$on('stop', this.stop)
             PlayerEvents.$on('update', this.onUpdate)
             PlayerEvents.$on('videotext', this.onVideoText)
@@ -70,6 +71,7 @@
             PlayerEvents.$off('anglechange', this.anglechange)
             PlayerEvents.$off('audiopanchange', this.audiopanchange)
             PlayerEvents.$off('playbackratechange', this.playbackratechange)
+            PlayerEvents.$off('levelchange', this.levelchange)
             PlayerEvents.$off('update', this.onUpdate)
             PlayerEvents.$off('videotext', this.onVideoText)
             PlayerEvents.$off('stop', this.stop)
@@ -87,6 +89,9 @@
             },
             playbackratechange (rate) {
                 this.playbackRate = rate
+            },
+            levelchange (quality) {
+                this.quality = quality.label
             },
             onUpdate (data) {
                 if (!this.$refs.seekbar.isSliding) this.$refs.seekbar.setValue(data.position)

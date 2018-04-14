@@ -102,6 +102,15 @@
                                     onclick () {
                                         router.push('flashcheck')
                                     }
+                                },
+                                {
+                                    id: 'dev',
+                                    label: 'Dev Testing',
+                                    type: 'button',
+                                    desc: 'Testing area for development',
+                                    onclick () {
+                                        router.push('dev')
+                                    }
                                 }
                             ]
                         }

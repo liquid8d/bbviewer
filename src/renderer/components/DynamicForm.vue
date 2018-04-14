@@ -11,15 +11,15 @@
                 <div class="input">
                     <input v-if="item.type==='checkbox'" tabindex="-1" :name="item.id" :type="item.type" :checked="form.getValue" v-on:change="form.setValue" />
                     <input v-if="item.type==='number'" :name="item.id" :type="item.type" :value="item.getValue || 0" :onblur="item.setValue" />
+                    <button v-if="item.type==='button'" @click="item.onclick">{{item.label}}</button>
                     <!-- 
                     <select v-if="item.type==='select'" tabindex="-1" :name="item.id" :onchange="updateValue">
                         <option v-for="option in item.options" v-bind:key="option.id" :value="option.id" :selected="option.id === getValue(option.id)">{{option.label}}</option>
                     </select>
                     <input v-if="item.type==='textbox'" :name="item.id" :type="item.type" :value="item.value || ''" />
                     <textarea v-if="item.type==='textarea'" :name="item.id" :value="item.value || ''" />
-                    <button v-if="item.type==='button'" :onclick="item.onclick">{{item.label}}</button>
                     <div v-if="item.type==='folder'">
-                        <button tabindex=-1 :name="item.id" v-on:click="folder = chooseFolder()">{{folder || 'Choose'}}</button>
+                        <button tabindex=-1 :name="item.id" @click="folder = chooseFolder()">{{folder || 'Choose'}}</button>
                     </div> -->
                     <!-- custom setting items -->
                     <!--

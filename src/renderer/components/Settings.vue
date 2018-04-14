@@ -23,12 +23,12 @@
             <button @click="dir = chooseFolder()">Choose Folder</button>
             <button @click="setWindowTitle('Test')">Set Window Title</button>
         </div>
-        -->
         <div v-if="showFlash" class="container pad">
             <header>Flash test</header>
             <webview v-if="$store.isElectron" class="flash" src="http://wwwimages.adobe.com/www.adobe.com/swf/software/flash/about/flash_about_793x170.swf" plugins></webview>
             <object v-if="!$store.isElectron" class="flash" type="application/x-shockwave-flash" data="http://wwwimages.adobe.com/www.adobe.com/swf/software/flash/about/flash_about_793x170.swf" style="width: auto; height: auto;"> <param name="movie" value="http://wwwimages.adobe.com/www.adobe.com/swf/software/flash/about/flash_about_793x170.swf" /><param name="wmode" value="transparent" /><param name="FlashVars" value="" /><param name="quality" value="high" /><param name="menu" value="false" /></object>
         </div>
+        -->
         <div class="container">
             <button class="icon" @mousedown.stop @click="$router.replace('/')" v-bind:title="$t('back')"><img src="static/controls/ic_chevron_left_white_48px.svg" /><span>{{$t('back')}}</span></button>
         </div>
@@ -52,6 +52,7 @@
     import DynamicForm from './DynamicForm'
     import Utils from '@/mixins/Utils'
     import Player from './Player/Player'
+    import router from '../router'
     import { PlayerEvents } from './Player/PlayerEvents'
 
     export default {
@@ -86,6 +87,21 @@
                                     type: 'number',
                                     label: 'Hide Timeout',
                                     desc: 'The delay, in milliseconds, before window title and controls are hidden if hide delay is enabled'
+                                }
+                            ]
+                        },
+                        {
+                            id: 'misc',
+                            label: 'Misc',
+                            items: [
+                                {
+                                    id: 'flashcheck',
+                                    label: 'Flash Check',
+                                    type: 'button',
+                                    desc: 'Check if Flash is installed',
+                                    onclick () {
+                                        router.push('flashcheck')
+                                    }
                                 }
                             ]
                         }

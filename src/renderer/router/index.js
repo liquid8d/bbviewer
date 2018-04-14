@@ -13,6 +13,7 @@ export default new Router({
         { path: '/cast', name: 'cast', component: require('@/components/Cast').default },
         { path: '/donate', name: 'donate', component: require('@/components/Donate').default },
         { path: '/flashbacks', name: 'flashbacks', component: require('@/components/Flashbacks').default },
+        { path: '/flashcheck', name: 'flashcheck', component: require('@/components/FlashCheck').default },
         { path: '/menu', name: 'menu', component: require('@/components/Menu').default },
         { path: '/notifications', name: 'notifications', component: require('@/components/Notifications/Notifications').default },
         { path: '/settings', name: 'settings', component: require('@/components/Settings').default },

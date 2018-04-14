@@ -73,7 +73,7 @@
             PlayerEvents.$on('provideAngles', this.onAngles)
             PlayerEvents.$on('provideLevels', this.onLevels)
         },
-        beforeDestory () {
+        beforeDestroy () {
             PlayerEvents.$off('toggleAngle', this.showAngles)
             PlayerEvents.$off('toggleAudioPan', this.toggleAudioPan)
             PlayerEvents.$off('toggleSpeed', this.toggleSpeed)
@@ -81,7 +81,7 @@
             PlayerEvents.$off('toggleMenu', this.toggleMenu)
             PlayerEvents.$off('provideAngles', this.onAngles)
             PlayerEvents.$off('provideLevels', this.onLevels)
-            this.hideMenu()
+            this.toggleMenu()
         },
         methods: {
             onAngles (angles) {

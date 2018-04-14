@@ -42,6 +42,12 @@ export default {
     },
     mixins: [ Utils ],
     mounted () {
+        // listen to swf events for dev
+        window.swfPlayer = function (data) {
+            // console.log('got sfw data')
+            // console.dir(data)
+        }
+
         if (this.$globals.player == null) {
             this.$globals.player = window.videojs(this.$el.querySelector('video'), {
                 techOrder: ['html5', 'youtube', 'vimeo', 'flash'],
@@ -89,6 +95,7 @@ export default {
             PlayerEvents.$on('aspectRatio', this.aspectRatio)
             PlayerEvents.$on('play', this.play)
             PlayerEvents.$on('playItem', this.playItem)
+            PlayerEvents.$on('playSWF', this.playSWF)
             PlayerEvents.$on('pause', this.pause)
             PlayerEvents.$on('stop', this.stop)
             PlayerEvents.$on('seek', this.seek)
@@ -112,8 +119,9 @@ export default {
     beforeDestroy () {
         PlayerEvents.$off('setHandler', this.setHandler)
         PlayerEvents.$off('aspectRatio', this.aspectRatio)
-        PlayerEvents.$off('playItem', this.playItem)
         PlayerEvents.$off('play', this.play)
+        PlayerEvents.$off('playItem', this.playItem)
+        PlayerEvents.$off('playSWF', this.playSWF)
         PlayerEvents.$off('pause', this.pause)
         PlayerEvents.$off('stop', this.stop)
         PlayerEvents.$off('seek', this.seek)
@@ -126,13 +134,15 @@ export default {
         PlayerEvents.$off('toggleMute', this.toggleMute)
         PlayerEvents.$off('setAudioPan', this.setAudioPan)
         PlayerEvents.$off('pip', this.togglePip)
+        PlayerEvents.$off('requestAngles', this.onRequestAngles)
         PlayerEvents.$off('requestBookmarks', this.requestBookmarks)
         PlayerEvents.$off('loadBookmark', this.loadBookmark)
-        // angle events
-        PlayerEvents.$off('requestAngles', this.onRequestAngles)
         PlayerEvents.$off('switchAngle', this.switchAngle)
     },
     methods: {
+        setSWF (swf) {
+            this.$globals.player.options_.flash.swf = swf
+        },
         setHandler (handler) {
             console.log('set player handler to: ' + handler.id)
             this.handler = handler
@@ -181,15 +191,25 @@ export default {
             return this.$globals.player.duration()
         },
         isPlayingLive () {
+            if (this.handler && this.handler.isPlayingLive) {
+                return this.handler.isPlayingLive()
+            }
             return this.duration() - this.currentTime() < this.settings.liveWindow
         },
         isLiveStream () {
-            return this.streamInfo.isLiveStream
+            if (this.handler && this.handler.isLiveStream) {
+                return this.handler.isLiveStream()
+            } else if (this.tech.sourceHandler_ && this.tech.sourceHandler_.hls) {
+                return this.tech.sourceHandler_.hls.liveSyncPosition !== undefined
+            }
+            return false
         },
         goLive () {
             if (this.$globals.player.seekable()) {
+                // console.log('seekable to end')
                 this.$globals.player.currentTime(this.$globals.player.seekable().end(0))
             } else {
+                // console.log('seek to end')
                 this.seekTo(this.$globals.player.duration())
             }
         },
@@ -209,6 +229,12 @@ export default {
         playbackRate (rate) {
             this.$globals.player.playbackRate(rate)
             PlayerEvents.$emit('playbackratechange', rate)
+        },
+        playSWF (item) {
+            if (!item.swf) return
+            // set swf
+            this.setSWF(item.swf)
+            this.play(item.src)
         },
         playItem (item) {
             // load source handler, if provided
@@ -252,12 +278,14 @@ export default {
             } else if (src.indexOf('vimeo.com') >= 0) {
                 // VIMEO
                 this.$globals.player.src({ src: src, type: 'video/vimeo' })
-            } else if (src.indexOf('rtmp://') >= 0) {
-                // RTMP
+            } else if (src.indexOf('rtmp://' >= 0)) {
+                // RTMP or Custom SWF
                 this.$globals.player.src({ src: src, type: 'rtmp/mp4' })
             } else if (src.indexOf('.f4m') >= 0) {
                 // HDS
                 this.$globals.player.src({ src: src, type: 'application/f4m' })
+            } else if (this.$globals.player.options_.flash.swf) {
+                this.$globals.player.src({ src: src })
             } else {
                 console.warn('unsupported video source')
             }
@@ -278,6 +306,7 @@ export default {
                 AudioPan.init(this.tech.el())
             } else if (event.type === 'loadedmetadata') {
                 console.log('loaded metadata')
+                // console.dir(this.tech)
                 // console.dir(this.$globals.player.qualityLevels())
                 if (this.handler && this.handler.onLoadedMetadata) this.handler.onLoadedMetadata()
 
@@ -302,7 +331,6 @@ export default {
                             PlayerEvents.$emit('switchlevel', this)
                         }
                     })
-                    this.streamInfo.isLiveStream = this.tech.sourceHandler_.hls.liveSyncPosition
                     this.streamInfo.currentLevel = (this.tech.sourceHandler_.hls.manualLevel === -1) ? 0 : this.tech.sourceHandler_.hls.currentLevel
                     this.streamInfo.qualities = qualities
                     PlayerEvents.$emit('provideLevels', this.streamInfo.qualities)
@@ -317,10 +345,8 @@ export default {
                 this.streamInfo.currentHHMMSS = (this.streamInfo.currentTime !== -1) ? this.toHHMMSS(this.streamInfo.currentTime) : ''
                 this.streamInfo.durationHHMMSS = (this.streamInfo.duration !== -1) ? this.toHHMMSS(this.streamInfo.duration) : ''
                 this.streamInfo.position = (this.streamInfo.currentTime !== -1 && this.streamInfo.duration !== -1) ? this.streamInfo.currentTime / this.streamInfo.duration : 0
-                if (this.isPlayingLive() !== this.streamInfo.isPlayingLive) {
-                    PlayerEvents.$emit((this.isPlayingLive) ? 'live' : 'notlive')
-                    this.streamInfo.isPlayingLive = this.isPlayingLive()
-                }
+                this.streamInfo.isLiveStream = this.isLiveStream()
+
                 // show some debug info
                 if (document.getElementById('debug')) {
                     document.getElementById('debug').innerHTML = `
@@ -389,6 +415,7 @@ export default {
         },
         stop () {
             this.$globals.player.reset()
+            this.$globals.player.options_.flash.swf = '../node_modules/videojs-swf/dist/video-js.swf'
             this.streamInfo = {
                 volume: 0,
                 currentTime: 0,
@@ -402,6 +429,7 @@ export default {
             }
             if (this.handler) this.handler.onStop()
             this.handler = null
+            PlayerEvents.$emit('notlive')
             PlayerEvents.$emit('provideLevels', [])
             PlayerEvents.$emit('levelchange', '')
             PlayerEvents.$emit('videotext', '')

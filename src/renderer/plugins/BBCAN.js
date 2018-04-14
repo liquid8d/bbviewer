@@ -13,6 +13,10 @@ const BBCAN = new VideoPlugin({
     config: {
         item: null,
         angle: 1,
+        enableSWF: true,
+        currentTime: 0,
+        duration: 0,
+        playTime: 0,
         angles: [
             { id: 1, label: 'Cam 1', desc: 'Cam 1', click: function () { PlayerEvents.$emit('switchAngle', 1) } },
             { id: 2, label: 'Cam 2', desc: 'Cam 2', click: function () { PlayerEvents.$emit('switchAngle', 2) } },
@@ -22,10 +26,20 @@ const BBCAN = new VideoPlugin({
         flashbacks: null,
         url: 'https://player-api.new.livestream.com/accounts/[account]/events/[event]/broadcasts/[broadcast].secure.m3u8?dw=14400&hdnea=[auth]'
     },
+    isLiveStream () {
+        return true
+    },
+    isPlayingLive () {
+        if (this.currentTime === 0 || this.duration === 0) return false
+        return this.duration - this.currentTime < 40
+    },
     onUpdate (data) {
         // update video text and window title while playing
         let text
         try {
+            this.currentTime = data.currentTime
+            this.duration = data.duration
+            // console.log(this.duration - this.currentTime)
             text = moment().tz('America/New_York').format('MMM Do YYYY, h:mm:ss a')
         } catch (e) {
             text = ''
@@ -34,7 +48,6 @@ const BBCAN = new VideoPlugin({
         PlayerEvents.$emit('videotext', text)
     },
     onRequestAngles () {
-        console.log('providing angles')
         PlayerEvents.$emit('provideAngles', this.config.angles)
     },
     onStop () {
@@ -55,7 +68,7 @@ const BBCAN = new VideoPlugin({
                     let event = id.substr(account.length + 1, 7)
                     let broadcast = this.config.flashbacks[key][i].bid
                     console.log('play ' + account + ',' + event + ',' + broadcast)
-                    this.playStream(account, event, broadcast)
+                    this.playBroadcast(account, event, broadcast)
                     break
                 }
             }
@@ -72,6 +85,13 @@ const BBCAN = new VideoPlugin({
     },
     play (src) {
         this.config.item = src
+        if (src.bitrates) {
+            let levels = []
+            for (let i = 0; i < src.bitrates.length; i++) {
+                levels.push({ id: src.bitrates[i].id, label: src.bitrates[i].label, onclick: null })
+            }
+            PlayerEvents.$emit('provideLevels', levels)
+        }
         let config = { headers: {'Cache-Control': 'no-cache'} }
         if (!this.config.flashbacks) {
             axios.get(src.flashbacks, config)
@@ -84,26 +104,28 @@ const BBCAN = new VideoPlugin({
         }
     },
     playLive () {
-        // play most recent flashback for current angle
+        // find most recent flashback entry for selected angle
         let id = this.config.flashbacks['cam' + this.config.angle][0].id
-        let account = id.substr(0, id.indexOf('_'))
-        let event = id.substr(id.indexOf('_') + 1, id.indexOf('_', id.indexOf('_')))
-        let broadcast = this.config.flashbacks['cam' + this.config.angle][0].bid
-        let path = this.config.flashbacks['cam' + this.config.angle][0].id + '@' + this.config.flashbacks['cam' + this.config.angle][0].sid
-        this.playStream(account, event, broadcast, path)
-    },
-    playStream (account, event, broadcast, path) {
-        let current = Math.floor(Date.now() / 1000)
-        let expire = current + 1800
-        let auth = 'st=[current]~exp=[expire]~acl=/i/[path]/*~hmac=' + this.getToken()
-        auth = auth.replace('[current]', current).replace('[expire]', expire).replace('[path]', path)
-        let url = this.config.url.replace('[account]', account).replace('[event]', event).replace('[broadcast]', broadcast).replace('[auth]', auth)
-        PlayerEvents.$emit('play', url)
-    },
-    randomIntInc (low, high) {
-        return Math.floor(Math.random() * (high - low + 1) + low)
+        let sid = this.config.flashbacks['cam' + this.config.angle][0].sid
+        let quality = '3628'
+        if (this.config.enableSWF) {
+            // play using swf
+            PlayerEvents.$emit('playSWF', {
+                swf: this.config.item.swf,
+                src: 'http://livestream-f.akamaihd.net/' + id + '_1_' + quality + '@' + sid + '?v=3.6.0&fp=WIN%2020,0,0,306&r=' + this.randomCacheString(5) + '&g=' + this.randomCacheString()
+            })
+        } else {
+            // play hls broadcast
+            let account = id.substr(0, id.indexOf('_'))
+            let event = id.substr(id.indexOf('_') + 1, id.indexOf('_', id.indexOf('_')))
+            let broadcast = this.config.flashbacks['cam' + this.config.angle][0].bid
+            let path = this.config.flashbacks['cam' + this.config.angle][0].id + '@' + sid
+            this.streamStartTime = parseFloat(this.config.flashbacks['cam' + this.config.angle][0].timestamp)
+            this.playBroadcast(account, event, broadcast, path)
+        }
     },
     getToken () {
+        // generate a token to use for a broadcast
         var token = ''
         for (var i = 0; i < 64; i++) {
             var val = this.randomIntInc(0, 15)
@@ -111,6 +133,30 @@ const BBCAN = new VideoPlugin({
             token += val
         }
         return token
+    },
+    playBroadcast (account, event, broadcast, path) {
+        // play an hls broadcast from livestream
+        let current = Math.floor(Date.now() / 1000)
+        let expire = current + 1800
+        let auth = 'st=[current]~exp=[expire]~acl=/i/[path]/*~hmac=' + this.getToken()
+        auth = auth.replace('[current]', current).replace('[expire]', expire).replace('[path]', path)
+        let url = this.config.url.replace('[account]', account).replace('[event]', event).replace('[broadcast]', broadcast).replace('[auth]', auth)
+        console.log(url)
+        PlayerEvents.$emit('play', url)
+    },
+    randomIntInc (low, high) {
+        return Math.floor(Math.random() * (high - low + 1) + low)
+    },
+    randomCacheString (count) {
+        // get a random cache string
+        if (!count) count = 12
+        let cacheString = ''
+        let counter = 0
+        while (counter < count) {
+            cacheString = cacheString + String.fromCharCode(65 + Math.round(Math.random() * 25))
+            counter = counter + 1
+        }
+        return cacheString
     }
 })
 

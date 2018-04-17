@@ -42,12 +42,14 @@ export default {
     mixins: [ Utils ],
     components: { Backdrop, Player, PlayerEvents, Notification },
     router,
+    computed: {
+        hideLeave () { return this.$store.state.config.hideLeave },
+        hideDelay () { return this.$store.state.config.hideDelay },
+        hideTimeout () { return this.$store.state.config.hideTimeout }
+    },
     data () {
         return {
-            activeNotice: null,
-            hideLeave: true,
-            hideDelay: true,
-            hideTimeout: 4000
+            activeNotice: null
         }
     },
     mounted () {
@@ -57,7 +59,12 @@ export default {
                 router.replace('/')
             }
         })
-        this.setDraggable(document.querySelector('#app'))
+
+        // update app dragging now and when drag config value changes
+        this.updateDrag()
+        this.$store.subscribe((mutation, state) => {
+            if (mutation.type === 'saveConfig' && mutation.payload.key === 'dragWindow') this.updateDrag()
+        })
 
         PlayerEvents.$on('showNotice', this.showNotice)
         PlayerEvents.$on('clearNotice', this.clearNotice)
@@ -84,18 +91,25 @@ export default {
         PlayerEvents.$off('notice', this.clearNotice)
     },
     methods: {
+        updateDrag () {
+            if (this.$store.state.config.dragWindow) {
+                this.setDraggable(document.querySelector('#app'))
+            } else {
+                this.setDraggable(null)
+            }
+        },
         onMouseLeave () {
             if (this.hideLeave) {
                 if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
                 if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
-                PlayerEvents.$emit('showMenu', false)
+                PlayerEvents.$emit('hideMenu')
             }
         },
         onDelay () {
             if (this.hideDelay) {
                 if (this.$refs.titlebar) this.$refs.titlebar.style.display = 'none'
                 if (document.querySelector('.controls')) document.querySelector('.controls').style.display = 'none'
-                PlayerEvents.$emit('showMenu', false)
+                PlayerEvents.$emit('hideMenu')
             }
         },
         showNotice (data) {

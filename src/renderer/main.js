@@ -22,6 +22,11 @@ if (!process.env.IS_WEB) {
 }
 store.commit('lastRun')
 
+// load saved config
+if (localStorage.getItem('config')) {
+    store.commit('loadConfig', JSON.parse(localStorage.getItem('config')))
+}
+
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 

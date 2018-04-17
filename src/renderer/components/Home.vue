@@ -70,6 +70,7 @@
             PlayerEvents.$on('toggleSpeed', this.toggleSpeed)
             PlayerEvents.$on('toggleQuality', this.toggleQuality)
             PlayerEvents.$on('toggleMenu', this.toggleDefault)
+            PlayerEvents.$on('hideMenu', this.hideMenu)
             PlayerEvents.$on('provideAngles', this.onAngles)
             PlayerEvents.$on('provideLevels', this.onLevels)
         },
@@ -79,6 +80,7 @@
             PlayerEvents.$off('toggleSpeed', this.toggleSpeed)
             PlayerEvents.$off('toggleQuality', this.toggleQuality)
             PlayerEvents.$off('toggleMenu', this.toggleMenu)
+            PlayerEvents.$off('hideMenu', this.hideMenu)
             PlayerEvents.$off('provideAngles', this.onAngles)
             PlayerEvents.$off('provideLevels', this.onLevels)
             this.toggleMenu()
@@ -89,6 +91,9 @@
             },
             onLevels (list) {
                 this.qualityMenuItems = list
+            },
+            hideMenu () {
+                this.$refs.appMenu.$el.style.display = 'none'
             },
             toggleMenu (which) {
                 if (this.$refs.appMenu) {

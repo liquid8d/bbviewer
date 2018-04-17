@@ -30,7 +30,8 @@ const ExtendedInput = {
             'ul > li:not([display=none]):not([disabled])',
             'div.ui:not([display=none]):not([disabled])',
             'input:not([display=none]):not([disabled])',
-            'textarea:not([display=none]):not([disabled])'
+            'textarea:not([display=none]):not([disabled])',
+            'select:not([display=none]):not([disabled])'
         ]
     },
     install (vue, options) {

@@ -35,11 +35,18 @@ const Utils = {
             })
         },
         setDraggable (el) {
-            this.dragElement = el
-            el.addEventListener('mousedown', this.startDrag)
-            el.addEventListener('mousemove', this.dragWindow)
-            el.addEventListener('mouseup', this.stopDrag)
-            document.body.addEventListener('mouseleave', this.stopDrag)
+            if (this.dragElement) {
+                this.dragElement.removeEventListener('mousedown', this.startDrag)
+                this.dragElement.removeEventListener('mousemove', this.dragWindow)
+                this.dragElement.removeEventListener('mouseup', this.stopDrag)
+            }
+            if (el) {
+                this.dragElement = el
+                el.addEventListener('mousedown', this.startDrag)
+                el.addEventListener('mousemove', this.dragWindow)
+                el.addEventListener('mouseup', this.stopDrag)
+                document.body.addEventListener('mouseleave', this.stopDrag)
+            }
         },
         startDrag (e) {
             this.isDragging = true
